@@ -1,27 +1,31 @@
 #!/usr/bin/env python3
 
 import os, gnupg, hashlib
-from .gentoomuch_common import stages_path, gpg_path, asc_ext, gentoo_signing_key, gentoo_upstream_url
+from .gentoomuch_common import stages_path, gpg_path, asc_ext, digests_ext, gentoo_signing_key, gentoo_upstream_url
 from .read_file_lines import read_file_lines
 
 
 def verify_tarball(filepath : str):
-    gpg = gnupg.GPG()#gnupghome = gpg_path)
-    public_keys = gpg.list_keys() 
-    # print(public_keys)
-    filename = os.path.relpath(filepath, stages_path)
-    print("INFO: Verifying signature of file " +  filename)
-    asc_file = open(filepath + asc_ext, 'rb').read()
-    if not gpg.verify(asc_file):
-        print("ERROR: Failed to verify signature file: " + filename + asc_ext)
+    gpg = gnupg.GPG()
+    #public_keys = gpg.list_keys() 
+    #print(public_keys)
+    #filename = os.path.relpath(filepath, stages_path)
+    print("INFO: Verifying signature of file " +  filepath)
+    digests_filepath = filepath + digests_ext
+    digests_file = open(digests_filepath, 'rb').read()
+    #print(digests_file)
+    #print(gpg.verify(digests_file))
+    if not gpg.verify(digests_file):
+        print("ERROR: Failed to verify signature file: " + filepath + digests_ext)
         return False
     found = False
-    lines = asc_file.decode('ascii').split('\n')
+    digests_file = open(filepath + digests_ext, 'rb').read()
+    lines = digests_file.decode('ascii').split('\n')
     ctr = 0
     # We are going to find the line in the .asc file that corresponds to our SHA512 sig and obtain it.
     while not found:
         if ctr + 1 == len(lines):
-            exit("ERROR: Reached end of " + filename + asc_ext + " without finding the tarball's SHA512 hash.")
+            exit("ERROR: Reached end of " + filename + digests_ext + " without finding the tarball's SHA512 hash.")
             # return False
         if lines[ctr]  == '# SHA512 HASH':
             desired_sha512 = lines[ctr + 1].split(' ')[0]

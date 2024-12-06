@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
-import os, shutil
+import os, shutil, docker
 from .gentoomuch_common import output_path, stages_path, image_tag_base
 from .get_dockerized_profile_name import get_dockerized_profile_name
 from .get_dockerized_stagedef_name import get_dockerized_stagedef_name
 from .get_docker_tag import get_docker_tag
 from .docker_stage_exists import docker_stage_exists
 from .bootstrap_dockerfile import bootstrap_dockerfile
-
+from .get_profiles import get_profiles
+from .save_profiles import save_profiles
 
 # This turns a tarball into a dockerized stage
 def containerize(tarball_name : str, arch : str, profile : str, stagedef : str, upstream : bool) -> bool:
@@ -33,13 +34,32 @@ def containerize(tarball_name : str, arch : str, profile : str, stagedef : str, 
     new_tarball_path = os.path.join(bootstrap_dir, tarball_name) 
     # Now create our dockerfile.
     open(dockerfile, 'w').write(bootstrap_dockerfile(tarball_name, profile))
-    shutil.move(old_tarball_path, new_tarball_path)
+    os.system('mv ' + old_tarball_path + ' ' +  new_tarball_path)
     # We then import our bootstrap image, then build a new one using our dockerfile.
     # Then we get rid of the old bootstrap image.
-    code = os.system("cd " + bootstrap_dir + " && docker import " + tarball_name  + " " + bootstrap_tag + " && docker build -t " + desired_tag + " . && docker image rm -f " + bootstrap_tag + " &> /dev/null")
-    shutil.move(new_tarball_path, old_tarball_path)
+    code = os.system("cd " + bootstrap_dir)
+    if code != 0:
+        print("Could not change to bootstrap directory")
+        return False
+    code = os.system("docker import " + tarball_name  + " " + bootstrap_tag)
+    if code != 0:
+        print("Could not import tarball " + tarball_name)
+        return False
+    code = os.system("docker build -t " + desired_tag + " " + bootstrap_dir)
+    if code != 0:   
+        print("Could not docker-build")
+        return False
+    code = os.system("docker image rm -f " + bootstrap_tag + " &> /dev/null")
+    if code != 0:
+        print("Could not remove bootstrap image")
+    #os.system('mv ' + new_tarball_path + ' ' + old_tarball_path)
     if code == 0:
         print("INFO: Succesfully dockerized " + desired_tag)
+        profiles = get_profiles()
+        if profile not in profiles:
+            profiles.append(profile)
+            profiles.sort()
+            save_profiles(profiles)
         return True
     else:
         return False

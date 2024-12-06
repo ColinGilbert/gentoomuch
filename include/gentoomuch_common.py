@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import re, os
+from pathlib import Path
 from .get_dockerized_profile_name import get_dockerized_profile_name
 
 
 #Stuff all scripts here should use
 debug				        	= True
-output_path				    	= './gentoomuch-data'
+output_path				    	= os.path.join(Path.home(), 'gentoomuch-data')
 stages_path		            	= os.path.join(output_path, 'stages')
 gpg_path				    	= os.path.join(output_path, 'gpg')
 emergelogs_path             	= os.path.join(output_path, 'emerge.logs')
@@ -14,6 +15,7 @@ desired_stage_path		    	= os.path.join(output_path, 'desired_stage')
 desired_profile_path	    	= os.path.join(output_path, 'desired_profile')
 desired_packages_path	    	= os.path.join(output_path, 'desired_packages')
 desired_hooks_path		    	= os.path.join(output_path, 'desired_hooks')
+profiles_path                   = os.path.join(output_path, 'profiles')
 # Portage-related
 portage_output_path		    	= os.path.join(output_path, 'portage')
 sets_output_path		    	= os.path.join(portage_output_path, 'sets')
@@ -34,15 +36,14 @@ kernel_path				        = os.path.join(config_path, 'kernel.configs')
 env_settings_path               = os.path.join(config_path, 'env')
 arch_config_path		        = os.path.join(env_settings_path, 'arch')
 # These pertain to the stage signing.
-asc_ext			                = '.DIGESTS.asc'
+digests_ext                     =".DIGESTS"
+asc_ext			                = '.asc'
 gentoo_signing_key		        = "0xBB572E0E2D182910"
 gentoo_upstream_url             = "http://ftp-osl.osuosl.org/pub/gentoo/releases/"
-# These are the base profiles we download from upstream. Gentoomuch recompiles these with architecture-optmized flags and further build upon the results.
-profiles_amd64			        = ('default','hardened+nomultilib','hardened-selinux+nomultilib','hardened-selinux','hardened','musl-hardened','musl-vanilla','nomultilib','systemd','uclibc-hardened','uclibc-vanilla','x32')
 # This is for the Docker tags that we access as we work.
 image_tag_base			        = 'localhost:5000/gentoomuch-'
 active_image_tag		        = image_tag_base + 'current:latest'
-profiles_amd64_dockerized	    =  ( get_dockerized_profile_name(p) for p in profiles_amd64 )
+#profiles_amd64_dockerized	    =  ( get_dockerized_profile_name(p) for p in profiles_amd64 )
 dockerized_username             = 'gentoomuch-user'
 usage_str                       = "    gentoomuch "
 # Patches

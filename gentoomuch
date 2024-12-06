@@ -2,7 +2,7 @@
 
 import os, sys, re
 from typing import Tuple
-from include.gentoomuch_common import arch_config_path, config_path, output_path, profiles_amd64, usage_str
+from include.gentoomuch_common import arch_config_path, config_path, output_path, usage_str
 from include.freshroot import freshroot
 from include.sync import sync
 from include.swap_stage import swap_stage
@@ -18,10 +18,11 @@ from include.get_desired_profile import get_desired_profile
 from include.run_build import run_build
 from include.get_docker_tag import get_docker_tag
 from include.save_tarball import save_tarball
-from include.download_tarball import download_tarball
+from include.load_tarball import load_tarball
 from include.patches import prep_patch, try_patch, save_patch
 from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
 from include.downloader import downloader
+from include.get_profiles import get_profiles
 
 # Our commandline keywords
 ls_str          = 'ls'
@@ -71,7 +72,7 @@ def print_usage_profile():
     print_usage_profile_set()
 
 def print_usage_bootstrap():
-    print(usage_str + bootstrap_str + ' <name|"' + all_str +'">')
+    print(usage_str + bootstrap_str + ' <profile> <tarball>')
 
 def print_usage_patch():
     patch_usage = usage_str + patch_str + ' '
@@ -93,12 +94,8 @@ def print_usage():
 # We do this every time!
 arch = open(arch_config_path).read().strip()
 
-# This handles the bootstrap of each stage, built from upstream.
-def pull_sequence(profile : str):
-    if download_tarball(arch, profile):
-    # swap_stage(arch, profile, 'gentoomuch/builder')
-    # run_build(True)
-        save_tarball(arch, profile, 'gentoomuch/builder', bool(True))
+
+#get_profiles()
 
 # Now, we get properly started.
 ########################
@@ -144,25 +141,16 @@ elif prime_cmd == profile_str:
         print_usage_profile() 
         exit()
 #############################################
-# Bootstrap a stage from an upstream tarball.
+# Bootstrap a stage from a tarball.
 #############################################
 elif prime_cmd == bootstrap_str:
-    # If we are to pull all stages and bootstrap. Risky and time-consuming.
-    if len(sys.argv) > 2 and sys.argv[2] == all_str:
-        for p in profiles_amd64:
-            pull_sequence(p)
-    # If we have an profile argument that matches what we need.
-    elif len(sys.argv) > 2 and sys.argv[2] in profiles_amd64:
-        pull_sequence(sys.argv[2])
-    # If we have a profile argument but no match.
-    elif len(sys.argv) > 2:
-        exit("Could not find " + sys.argv[2] + " " + " in supported profiles.")
-    # We use the profile user has explicitly set as her desired default.
-    else:
-        if get_desired_profile()[0]:
-            pull_sequence(get_desired_profile()[1])
-        else:
-            exit("Tried to bootstrap, but no profile was set.")
+    if not len(sys.argv) == 4:
+        print_usage_bootstrap()
+        exit()
+    profile = sys.argv[2]
+    path = os.path.join(os.getcwd(), sys.argv[3])
+    load_tarball(arch, profile, path)
+    save_tarball(arch, profile, "gentoomuch/builder", True)
     exit()
 ##################
 # Handle patching.
