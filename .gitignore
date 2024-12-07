@@ -10,3 +10,4 @@ gentoomuch-data/
 !config/kernel.defines/kernel.sources/gentoo-upstream-latest
 !config/cpu.defines/
 !config/
+.vagrant
