@@ -9,8 +9,10 @@ def load_tarball(arch, profile, path):
     fname = os.path.split(path)[1]
     if verify_tarball(path):
         new_tarball_path = os.path.join(stages_path, fname)
-        print(new_tarball_path)
-        os.system("cp " + path + " " + new_tarball_path)
+        #print(new_tarball_path)
+        code = os.system("cp " + path + " " + new_tarball_path)
+        if code == 0:
+            pass
         # Dockerize that thing, ya'll
         print("INFO: Containerizing upstream tarball")
         return containerize(fname, arch, profile, '', bool(True))

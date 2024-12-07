@@ -10,7 +10,8 @@ from .get_docker_tag import get_docker_tag
 from .swap_stage import swap_stage
 from .get_local_tarball_name import get_local_tarball_name
 from .containerize import containerize
-
+from .get_gentoomuch_uid import get_gentoomuch_uid
+from .get_gentoomuch_gid import get_gentoomuch_gid
 
 def save_tarball(arch, profile, stage_define, upstream: bool):
     # Important to swap our active stage first!
@@ -26,6 +27,8 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     for l in packages:
         packages_str += l.strip()
         packages_str += ' '
+    uid = get_gentoomuch_uid()
+    gid = get_gentoomuch_gid()
     print('PACKAGES TO INSTALL : ' + packages_str)
       # The following dogs' meal of a command preps a stage inside a docker container. It then changes root into it and emerges. Then, it exits the chroot, unmounts all tempories, and packs a tarball as "stage3-<arch>-<base>-<user-stage-define>.tar.xz"
       # TODO: Parcel this out into smaller sections for manageability. The only real blocker here is the time it takes to test the command itself :P
@@ -33,9 +36,10 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     cmd_str += "docker-compose run gentoomuch-builder-privileged /bin/bash -c \""
     cmd_str += "emerge pigz && "
     cmd_str += "cd /mnt/gentoo && "
+    cmd_str += "mkdir -p /mnt/gentoo/etc/portage &&"
     cmd_str += "tar xpf /stage3-* --xattrs-include='*.*' --numeric-owner && "
-    cmd_str += "rm -rf /mnt/gentoo/etc/portage/* && "
-    cmd_str += "rsync -aXH /etc/portage/* /mnt/gentoo/etc/portage && "
+    #cmd_str += "rm -rf /mnt/gentoo/etc/portage/* && "
+    cmd_str += "rsync -aXH /etc/portage/* /mnt/gentoo/etc/portage/ && "
     cmd_str += "mount -t proc none /mnt/gentoo/proc && "
     cmd_str += "mount -t tmpfs none /mnt/gentoo/tmp && "
     cmd_str += "mount --rbind /sys /mnt/gentoo/sys && "
@@ -46,17 +50,17 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     cmd_str += "mkdir -p /mnt/gentoo/var/tmp/portage && "
     cmd_str += "mount --bind /var/tmp/portage /mnt/gentoo/var/tmp/portage && "
     cmd_str += "mount --bind /var/cache/binpkgs /mnt/gentoo/var/cache/binpkgs && "
-    cmd_str += "mkdir /mnt/gentoo/var/db/repos/gentoo && "
+    cmd_str += "mkdir -p /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "mount --bind /var/db/repos/gentoo /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "echo 'UTC' > ./etc/timezone && "
     cmd_str += "echo 'nameserver 8.8.8.8' > ./etc/resolv.conf && "
     cmd_str += "chroot . /bin/bash -c '" # Enter chroot
     cmd_str += "env-update && "
     cmd_str += ". /etc/profile && "
-    cmd_str += "emerge " + ("--emptytree " if upstream else "-uD --newuse --changed-use ") + packages_str + " @world && "
-    cmd_str += "chown 1000:1000 -R /var/tmp/portage"
+    cmd_str += "emerge --emptytree @world && "
+    cmd_str += "chown " + uid + ":" + gid + "-R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot
-    cmd_str += "chown 1000:1000 -R /var/tmp/portage && "
+    cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
     # cmd_str += "umount -fl /mnt/gentoo/var/tmp/portage && "
     # cmd_str += "chown 1000:1000 -R /var/tmp/portage/* && "
     cmd_str += "umount -fl /mnt/gentoo/tmp && "
@@ -68,7 +72,7 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     cmd_str += "umount -fl /mnt/gentoo/var/tmp/portage && "
     cmd_str += "cd /mnt/gentoo && "
     cmd_str += "tar -cvf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls && "
-    cmd_str += "chown 1000:1000 /mnt/stages/" + archive_name
+    cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
     cmd_str +=  "\""
     code = os.system(cmd_str)
     if not code == 0:

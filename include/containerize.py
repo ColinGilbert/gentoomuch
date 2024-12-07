@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os, shutil, docker
+from pathlib import Path
 from .gentoomuch_common import output_path, stages_path, image_tag_base
 from .get_dockerized_profile_name import get_dockerized_profile_name
 from .get_dockerized_stagedef_name import get_dockerized_stagedef_name
@@ -30,11 +31,14 @@ def containerize(tarball_name : str, arch : str, profile : str, stagedef : str, 
     # Delete the dockerfile, if present from another build...
     if os.path.isfile(dockerfile):
         os.remove(dockerfile)
-    old_tarball_path = os.path.join(stages_path, tarball_name)
+    old_tarball_path = os.path.join(Path.cwd(), tarball_name)
     new_tarball_path = os.path.join(bootstrap_dir, tarball_name) 
     # Now create our dockerfile.
     open(dockerfile, 'w').write(bootstrap_dockerfile(tarball_name, profile))
-    os.system('mv ' + old_tarball_path + ' ' +  new_tarball_path)
+    code = os.system('cp ' + old_tarball_path + ' ' +  new_tarball_path)
+    if code != 0:
+        print("Could not copy tarball from " + old_tarball_path + " to " + new_tarball_path)
+        return False
     # We then import our bootstrap image, then build a new one using our dockerfile.
     # Then we get rid of the old bootstrap image.
     code = os.system("cd " + bootstrap_dir)

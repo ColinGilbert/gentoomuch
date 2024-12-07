@@ -7,7 +7,7 @@ from .get_gentoomuch_uid import get_gentoomuch_uid
 def bootstrap_dockerfile(tarball_name: str, profile: str) -> str:
     results =  'FROM scratch\n'
     results += 'COPY --from=localhost:5000/gentoomuch-bootstrap:latest / /\n'
-    #results += 'COPY ' + tarball_name + ' /\n'
+    results += 'COPY ' + tarball_name + ' /\n'
     results += 'WORKDIR /\n'
     results += 'RUN mkdir /mnt/stages \\\n'
     results += '&& mkdir /mnt/kernels \\\n'

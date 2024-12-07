@@ -25,7 +25,7 @@ def create_composefile(output_path : str, exporting_patch : str = ''):
     include_prefix = 'include/docker-compose/docker-compose.'
     lines.append('networks:\n')
     lines.append('  backend:\n')
-    lines.append('    driver: overlay\n')
+    lines.append('    driver: bridge\n')
     lines.append('volumes:\n')
     lines.append('  distfiles:\n')
     lines.append('    driver: local\n')
@@ -65,7 +65,7 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     kernels_str         = '    - kernels:/mnt/kernels'
     logs_mount_str      = '    - ./emerge.logs:/var/tmp/portage'
     results.append(binpkg_str + '\n')
-    results.append(distfiles_str +'\n')
+    results.append(distfiles_str + '\n')
     results.append(ebuilds_str + '\n')
     results.append(kernels_str + '\n')
     results.append(logs_mount_str + '\n')

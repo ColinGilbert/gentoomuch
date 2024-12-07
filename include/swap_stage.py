@@ -28,8 +28,6 @@ def swap_stage(arch : str, profile : str, stage_def : str, upstream : bool, patc
     code = os.system('docker rmi ' + active_image_tag) # To ensure we don't suffer from duplicates.
     if code == 0:
         pass
-    else:
-        exit("Could not remove duplicate tag")
     for i in dckr_imgs:
         print(i)
         if t in i.tags:
