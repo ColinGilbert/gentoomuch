@@ -12,12 +12,11 @@ from .get_profiles import get_profiles
 from .save_profiles import save_profiles
 
 # This turns a tarball into a dockerized stage
-def containerize(tarball_name : str, arch : str, profile : str, stagedef : str, upstream : bool, path: str) -> bool:
-    print("Called containerize. Tarball name = " + tarball_name + " profile = " + profile + ", stagedef = " + stagedef + ", upstream = " + str(upstream))
+def containerize(tarball_path : str, arch : str, profile : str, stagedef : str, upstream : bool) -> bool:
     # This tag is used to name an image that is imported as a bootstrap image.
     bootstrap_tag = image_tag_base + "bootstrap:latest"
     desired_tag = get_docker_tag(arch, profile, stagedef, bool(upstream))
-    print("Containerize... desired tag = " + desired_tag)
+    #print("Containerize... desired tag = " + desired_tag)
     # Which directory do we use to build?
     # If it exists, we're doing an update and thus we remove.
     # TODO: Replace with renaming and allow recovery from backup.
@@ -31,21 +30,17 @@ def containerize(tarball_name : str, arch : str, profile : str, stagedef : str, 
     # Delete the dockerfile, if present from another build...
     if os.path.isfile(dockerfile):
         os.remove(dockerfile)
-    old_tarball_path = os.path.join(path, tarball_name)
+    tarball_name = os.path.split(tarball_path)[1]
     new_tarball_path = os.path.join(bootstrap_dir, tarball_name) 
     # Now create our dockerfile.
     open(dockerfile, 'w').write(bootstrap_dockerfile(tarball_name, profile))
-    code = os.system('cp ' + old_tarball_path + ' ' +  new_tarball_path)
+    code = os.system('cp ' + tarball_path + ' ' +  new_tarball_path)
     if code != 0:
         print("Could not copy tarball from " + old_tarball_path + " to " + new_tarball_path)
         return False
     # We then import our bootstrap image, then build a new one using our dockerfile.
     # Then we get rid of the old bootstrap image.
-    code = os.system("cd " + bootstrap_dir)
-    if code != 0:
-        print("Could not change to bootstrap directory")
-        return False
-    code = os.system("docker import " + tarball_name  + " " + bootstrap_tag)
+    code = os.system("cd " + bootstrap_dir + " && docker import " + tarball_name  + " " + bootstrap_tag)
     if code != 0:
         print("Could not import tarball " + tarball_name)
         return False

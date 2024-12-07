@@ -33,7 +33,6 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     jobs = get_gentoomuch_jobs();
     print('PACKAGES TO INSTALL : ' + packages_str)
       # The following dogs' meal of a command preps a stage inside a docker container. It then changes root into it and emerges. Then, it exits the chroot, unmounts all tempories, and packs a tarball as "stage3-<arch>-<base>-<user-stage-define>.tar.xz"
-      # TODO: Parcel this out into smaller sections for manageability. The only real blocker here is the time it takes to test the command itself :P
     cmd_str = "cd " + output_path + " && "
     cmd_str += "docker-compose run gentoomuch-builder-privileged /bin/bash -c \""
     cmd_str += "emerge pigz && "
@@ -84,7 +83,7 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     #    It would be a mistake to passthrough the arguments' "upstream" variable in this particular context.
     #       By definition, a stage that's being saved from a Docker container has already been ingested and turned into something local.
     #    This property holds even when the binaries inside that dockerized stage come from upstream.
-    results = containerize(archive_name, arch, profile, stage_define, bool(False), stages_path)
+    results = containerize(os.path.join(stages_path, archive_name), arch, profile, stage_define, bool(False))
     # Thus ends the deceptively simple-looking method call....
     if results and upstream:
         print("******************************************************************************************************************")

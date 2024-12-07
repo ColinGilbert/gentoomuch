@@ -16,4 +16,4 @@ def load_tarball(arch, profile, path):
             pass
         # Dockerize that thing, ya'll
         print("INFO: Containerizing upstream tarball")
-        return containerize(fname, arch, profile, '', bool(True), Path.cwd())
+        return containerize(path, arch, profile, '', bool(True))
