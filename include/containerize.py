@@ -12,7 +12,7 @@ from .get_profiles import get_profiles
 from .save_profiles import save_profiles
 
 # This turns a tarball into a dockerized stage
-def containerize(tarball_name : str, arch : str, profile : str, stagedef : str, upstream : bool) -> bool:
+def containerize(tarball_name : str, arch : str, profile : str, stagedef : str, upstream : bool, path: str) -> bool:
     print("Called containerize. Tarball name = " + tarball_name + " profile = " + profile + ", stagedef = " + stagedef + ", upstream = " + str(upstream))
     # This tag is used to name an image that is imported as a bootstrap image.
     bootstrap_tag = image_tag_base + "bootstrap:latest"
@@ -31,7 +31,7 @@ def containerize(tarball_name : str, arch : str, profile : str, stagedef : str, 
     # Delete the dockerfile, if present from another build...
     if os.path.isfile(dockerfile):
         os.remove(dockerfile)
-    old_tarball_path = os.path.join(Path.cwd(), tarball_name)
+    old_tarball_path = os.path.join(path, tarball_name)
     new_tarball_path = os.path.join(bootstrap_dir, tarball_name) 
     # Now create our dockerfile.
     open(dockerfile, 'w').write(bootstrap_dockerfile(tarball_name, profile))

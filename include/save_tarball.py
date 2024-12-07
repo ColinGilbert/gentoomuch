@@ -12,6 +12,7 @@ from .get_local_tarball_name import get_local_tarball_name
 from .containerize import containerize
 from .get_gentoomuch_uid import get_gentoomuch_uid
 from .get_gentoomuch_gid import get_gentoomuch_gid
+from .get_gentoomuch_jobs import get_gentoomuch_jobs
 
 def save_tarball(arch, profile, stage_define, upstream: bool):
     # Important to swap our active stage first!
@@ -29,6 +30,7 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
         packages_str += ' '
     uid = get_gentoomuch_uid()
     gid = get_gentoomuch_gid()
+    jobs = get_gentoomuch_jobs();
     print('PACKAGES TO INSTALL : ' + packages_str)
       # The following dogs' meal of a command preps a stage inside a docker container. It then changes root into it and emerges. Then, it exits the chroot, unmounts all tempories, and packs a tarball as "stage3-<arch>-<base>-<user-stage-define>.tar.xz"
       # TODO: Parcel this out into smaller sections for manageability. The only real blocker here is the time it takes to test the command itself :P
@@ -57,7 +59,7 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     cmd_str += "chroot . /bin/bash -c '" # Enter chroot
     cmd_str += "env-update && "
     cmd_str += ". /etc/profile && "
-    cmd_str += "emerge --emptytree @world && "
+    cmd_str += "emerge -uD -j" + jobs + " --emptytree " + packages_str + "@world && "
     cmd_str += "chown " + uid + ":" + gid + "-R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
@@ -71,7 +73,7 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     cmd_str += "umount -fl /mnt/gentoo/var/cache/binpkgs && "
     cmd_str += "umount -fl /mnt/gentoo/var/tmp/portage && "
     cmd_str += "cd /mnt/gentoo && "
-    cmd_str += "tar -cvf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls && "
+    cmd_str += "tar -cf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls && "
     cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
     cmd_str +=  "\""
     code = os.system(cmd_str)
@@ -82,7 +84,7 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     #    It would be a mistake to passthrough the arguments' "upstream" variable in this particular context.
     #       By definition, a stage that's being saved from a Docker container has already been ingested and turned into something local.
     #    This property holds even when the binaries inside that dockerized stage come from upstream.
-    results = containerize(archive_name, arch, profile, stage_define, bool(False))
+    results = containerize(archive_name, arch, profile, stage_define, bool(False), stages_path)
     # Thus ends the deceptively simple-looking method call....
     if results and upstream:
         print("******************************************************************************************************************")
