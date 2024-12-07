@@ -44,7 +44,8 @@ def swap_stage(arch : str, profile : str, stage_def : str, upstream : bool, patc
     if not found:
         sys.exit("FAILED TO SWAP STAGE: Could not find docker image " + t)
     if 'packages' in combiner.todo:
-        if len(combiner.todo['packages']) > 0:
+        if len
+        (combiner.todo['packages']) > 0:
             write_file_lines(desired_packages_path, combiner.todo['packages'])
     if 'hooks' in combiner.todo:
         if len(combiner.todo['hooks']) > 0:
