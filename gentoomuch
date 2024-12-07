@@ -149,11 +149,18 @@ elif prime_cmd == bootstrap_str:
         exit()
     profile = sys.argv[2]
     path = os.path.join(os.getcwd(), sys.argv[3])
-    load_tarball(arch, profile, path)
+    code = load_tarball(arch, profile, path)
+    if not code:
+        exit("Failed to load tarball")
     if not has_sync_happened():
-        sync()
+        print("Syncing for first time!")
+        code = sync()
+        if code != 0:
+            exit("Could not sync")
         set_sync_happened()
-    save_tarball(arch, profile, "gentoomuch/builder", True)
+        save_tarball(arch, profile, "gentoomuch/builder", True)
+    else:
+        save_tarball(arch, profile, "gentoomuch/builder", True)
     exit()
 ##################
 # Handle patching.

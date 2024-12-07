@@ -2,9 +2,13 @@
 
 import os
 from .gentoomuch_common import output_path
-
+from .composefile import create_composefile
 def sync():
-    os.system("cd " + output_path + " && docker-compose run gentoomuch-updater /bin/bash -c 'emerge -v --sync")
+    code = create_composefile(output_path)
+    if code:
+      pass
+    code = os.system("cd " + output_path + " && docker-compose run gentoomuch-updater /bin/bash -c 'emerge --sync'")
+    return code
 
 
 sync_flag_path = os.path.join(output_path, "sync_flag")
