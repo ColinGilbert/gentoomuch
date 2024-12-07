@@ -59,8 +59,8 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     cmd_str += "chroot . /bin/bash -c '" # Enter chroot
     cmd_str += "env-update && "
     cmd_str += ". /etc/profile && "
-    cmd_str += "emerge -uD -j" + jobs + " --emptytree " + packages_str + "@world && "
-    cmd_str += "chown " + uid + ":" + gid + "-R /var/tmp/portage"
+    cmd_str += "emerge -j" + jobs + (" --emptytree " if upstream else " -uD --changed-used --newuse ") + packages_str + "@world && "
+    cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
     # cmd_str += "umount -fl /mnt/gentoo/var/tmp/portage && "
