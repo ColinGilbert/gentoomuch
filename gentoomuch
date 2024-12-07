@@ -4,7 +4,7 @@ import os, sys, re
 from typing import Tuple
 from include.gentoomuch_common import arch_config_path, config_path, output_path, usage_str
 from include.freshroot import freshroot
-from include.sync import sync
+from include.sync import sync, has_sync_happened, set_sync_happened
 from include.swap_stage import swap_stage
 from include.composefile import create_composefile
 from include.tag_parser import tag_parser
@@ -150,6 +150,9 @@ elif prime_cmd == bootstrap_str:
     profile = sys.argv[2]
     path = os.path.join(os.getcwd(), sys.argv[3])
     load_tarball(arch, profile, path)
+    if not has_sync_happened():
+        sync()
+        set_sync_happened()
     save_tarball(arch, profile, "gentoomuch/builder", True)
     exit()
 ##################
@@ -192,9 +195,10 @@ elif prime_cmd == pipeline_str:
 # Sync Portage tree. 
 ####################
 elif prime_cmd == sync_str:
-    swap_stage(arch, 'default', 'gentoomuch/builder', True)
-    # create_composefile(output_path)
-    sync()
-    #TODO: Remount SquashFS
+    if has_sync_happened():
+        swap_stage(arch, 'default', 'gentoomuch/builder', True)
+        sync()
+    else:
+        exit("Need to bootstrap a stage3 prior to first sync")
 else:
     print_usage()
