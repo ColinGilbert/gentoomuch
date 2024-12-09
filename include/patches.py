@@ -29,10 +29,10 @@ def get_patches_in_progress():
 
 
 def package_from_patch(patch_name : str) -> bool:
-    candidate = os.path.join(patches_in_progress_dir, patch_name)
-    print(candidate)
-    if os.path.isfile(candidate):
-        return (True, open(candidate, 'r').read().strip())
+    candidate = open(os.path.join(patches_in_progress_dir, patch_name)).read().strip()
+    print("PACKAGE FROM PATCH: " + candidate)
+    if os.path.isdir(os.path.join(patches_workdir, patch_name)):
+        return (True, candidate)
     return (False, '')
 
 
@@ -41,7 +41,7 @@ def send_diff(path_from: str, path_to : str, patch_name : str) -> bool:
     if not valid == True:
         print("Send diff: Could not derive package name") 
         return False
-    print(versioned_package)
+    print("Send diff: " + versioned_package)
     p = os.path.join(path_from, patch_name, versioned_package)
     repo = git.Repo(p)
     # Get first commit.
@@ -96,12 +96,17 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
     final_destination               = os.path.join(patches_mountpoint, versioned_package)
     where_all_the_actual_code_is    = os.path.join(patches_mountpoint, 'portage', versioned_package, 'work', '*')  #re.sub('-', '.', versioned_package_notag.split('/')[-1].upper()))
     # Now we assemble the actual command string.
-    cmd_str += 'mkdir ' + temp_sourcedir + ' && mv ' + where_all_the_actual_code_is + '/* ' + temp_sourcedir + ' && rm -rf ' + os.path.join(patches_mountpoint, 'portage') + ' && mkdir -p ' + versioned_package  + ' && mv ' + temp_sourcedir + '/* ' + final_destination + ' && rmdir ' + temp_sourcedir
     # Now we can spin up a docker and unpack that patch into the workdir.
+    #TODO Change to desired profile
     swap_stage(get_arch(), 'default' , 'gentoomuch/builder', False, patch_name)
-    code = os.system('cd ' + output_path  + ' &&  docker-compose run -u ' + get_gentoomuch_uid() + " gentoomuch-patcher /bin/bash -c '" + cmd_str + "'")
+    cmd_str += 'mkdir -p ' + temp_sourcedir + ' && mv ' + where_all_the_actual_code_is + ' ' + temp_sourcedir + ' && rm -rf ' + os.path.join(patches_mountpoint, 'portage') + ' && mkdir -p ' + versioned_package + ' && mv ' + os.path.join(temp_sourcedir, '*') + ' ' + final_destination + ' && rm -rf ' + temp_sourcedir
+    print("PATCHING - patches_in_progress_dir: " + patches_in_progress_dir + "\n patch_export_hostdir: " + patch_export_hostdir + "\n patches_mountpoint " + patches_mountpoint + "\n temp_sourcedir: " + temp_sourcedir + "\n final_destination: " + final_destination + "\n where_all_the_actual_code_is: " + where_all_the_actual_code_is)
+    create_composefile(output_path, patch_name)
+    code = os.system('cd ' + output_path  + " && docker-compose run --user gentoomuch-user gentoomuch-patcher /bin/bash -c '" + cmd_str + "'")
+    if code != 0:
+        return False
     # This appends the git commands we use to initiate the users' patch-making process.
-    os.system('cd ' + os.path.join(patch_export_hostdir, versioned_package) + ' && git init && git add . && git commit -m "As-is from upstream (virgin.)"')
+    code = os.system('cd ' + os.path.join(patch_export_hostdir, versioned_package) + ' && git init && git add . && git commit -m "As-is from upstream (virgin.)"')
     # Debug messages.
     # print('Repo name:' + repo_name)
     # print("Unpacked sourcecode basedir: " + patches_mountpoint)
@@ -112,7 +117,9 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
     if code != 0:
         return False
     if not os.path.isdir(patches_in_progress_dir):
-        os.makedirs(patches_in_progress_dir, exist_ok = True)
+        code = os.makedirs(patches_in_progress_dir, exist_ok = True)
+        if code == 0:
+            pass
     open(os.path.join(patches_in_progress_dir, patch_name), 'w').write(versioned_package)
     return True
 
@@ -128,9 +135,10 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
 def save_patch(patch_name : str, custom_output_path : str = '') -> bool:
     p = saved_patches_path if custom_output_path == '' else custom_output_path
     p = os.path.join(p, patch_name)
-    if os.path.isdir(p) and len(os.listdir(p)) == 0:
-        print("While saving patch " + patch_name + ", we encountered a problem: Directory " + p + " exists and is not empty!")
-        return False
+    if os.path.isdir(p) and len(os.listdir(p)) > 0:
+        code = os.system('rm -rf ' + os.path.join(p, '*'))# +print("While saving patch " + patch_name + ", we encountered a problem: Directory " + p + " exists and is not empty!")
+        if code == 0:
+            pass
     if not os.path.isdir(p):
         os.makedirs(p, exist_ok = True)
     send_diff(patches_workdir, p, patch_name)
@@ -145,12 +153,11 @@ def try_patch(patch_name : str):
     patch_outdir = os.path.join(portage_output_path, 'patches')
     print(patch_outdir)
     cmd_str = "emerge --usepkg n =" + package_name
-    #cmd_str = "/bin/bash"
     valid, profile = get_desired_profile()
     if valid:
         swap_stage(get_arch(), profile, 'gentoomuch/builder', True, str(patch_name))
         code = send_diff(patches_workdir, patch_outdir, patch_name)
-        create_composefile(output_path)
+        # create_composefile(output_path)
         if code == True:
             os.system("cd " + output_path + " && docker-compose run gentoomuch-builder /bin/bash -c '" + cmd_str + "'")
         return True

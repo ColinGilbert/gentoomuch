@@ -18,18 +18,18 @@ def swap_stage(arch : str, profile : str, stage_def : str, upstream : bool, patc
     combiner = portage_directory_combiner()
     combiner.process_stage_defines(stage_def)
     # We now add patches, per profile.
-    patch_profile(arch, profile)
+    patch_profile(profile)
     dckr = docker.from_env()
     dckr_imgs = dckr.images.list()
     found = False
     t = get_docker_tag(arch, profile, stage_def, bool(upstream))
-    print("TAG " + t)
+    #print("TAG " + t)
     # print("ATTEMPTING TO SWAP: " + t)
     code = os.system('docker rmi ' + active_image_tag) # To ensure we don't suffer from duplicates.
     if code == 0:
         pass
     for i in dckr_imgs:
-        print(i)
+        # print(i)
         if t in i.tags:
             cmd = "docker image tag " + t + " " + active_image_tag
             code = os.system(cmd)
@@ -50,4 +50,6 @@ def swap_stage(arch : str, profile : str, stage_def : str, upstream : bool, patc
         if len(combiner.todo['hooks']) > 0:
             write_file_lines(desired_hooks_path, combiner.todo['hooks'])
     create_composefile(output_path, patch_to_test)
-    os.system('cd ' + output_path + ' && docker-compose up --no-start')
+    code = os.system('cd ' + output_path + ' && docker-compose up --no-start')
+    if code == 0:
+        pass

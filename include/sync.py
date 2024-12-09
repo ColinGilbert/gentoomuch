@@ -3,10 +3,9 @@
 import os
 from .gentoomuch_common import output_path
 from .composefile import create_composefile
+
 def sync():
-    code = create_composefile(output_path)
-    if code:
-      pass
+    print("GENTOOMUCH: Syncing Portage...")
     code = os.system("cd " + output_path + " && docker-compose run gentoomuch-updater /bin/bash -c 'emerge --sync'")
     return code
 

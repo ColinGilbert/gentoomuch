@@ -148,6 +148,9 @@ elif prime_cmd == bootstrap_str:
         print_usage_bootstrap()
         exit()
     profile = sys.argv[2]
+    code = create_composefile(output_path)
+    if code:
+      pass
     path = os.path.join(os.getcwd(), sys.argv[3])
     code = load_tarball(arch, profile, path)
     if not code:
@@ -167,13 +170,15 @@ elif prime_cmd == bootstrap_str:
 ##################
 elif prime_cmd == patch_str:
     error_str = usage_str
+    if len(sys.argv) == 2:
+        print_usage_patch()
     if len(sys.argv) > 2 and sys.argv[2] == prep_str:
         ui_patch_prep_handler(3).handle()
     # We try a patch that is currently being worked upon.
     elif len(sys.argv) > 2 and sys.argv[2] == try_str:
         if len(sys.argv) > 3:
             patch_name = sys.argv[3]
-            print(patch_name)
+            #print(patch_name)
             try_patch(patch_name)
         else:
             print("You need to provide a patch name to try.")

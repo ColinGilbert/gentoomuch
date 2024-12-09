@@ -5,3 +5,5 @@ app-arch/cpio
 dev-vcs/git
 app-eselect/eselect-repository
 sys-fs/squashfs-tools
+app-editors/vim
+app-portage/gentoolkit

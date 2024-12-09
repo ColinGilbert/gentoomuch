@@ -38,7 +38,7 @@ def containerize(tarball_path : str, arch : str, profile : str, stagedef : str, 
     if code != 0:
         print("Could not copy tarball from " + old_tarball_path + " to " + new_tarball_path)
         return False
-    # We then import our bootstrap image, then build a new one using our dockerfile.
+    # We then import our bootstrap image, and build a new one using our dockerfile.
     # Then we get rid of the old bootstrap image.
     code = os.system("cd " + bootstrap_dir + " && docker import " + tarball_name  + " " + bootstrap_tag)
     if code != 0:

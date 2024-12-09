@@ -73,32 +73,16 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     # These are parts that have different permissions between the two types of containers.
     squashed_output_str = '    - ./squashed/blob:/mnt/squashed-portage'
     squashed_mount_str  = '    - ./squashed/mountpoint:/mnt/squashed-portage'
-    stages_mount_str    = '    - ./stages:/mnt/stages'
+    stages_mount_str    = '    - ./stages:/mnt/stages'    
     # Here we actually write these differential parts into our list.
     if is_builder or is_builder_privileged or is_patcher:
         results.append(squashed_mount_str + '\n')
         results.append(stages_mount_str + '\n')
+        results.append('    - ' + os.path.join('./patches.work', exporting_patch) + ':' + patches_mountpoint + '\n')
     if is_updater:
         results.append(squashed_output_str + '\n')
         results.append(stages_mount_str + ':ro\n')
-    if is_patcher:
-        patches_path = ''
-        first_dir_stripped = False
-        for d in patches_workdir.split('/')[1:]:
-            if first_dir_stripped:
-                patches_path += d + '/'
-            else:
-                first_dir_stripped = True
-        patches_path += exporting_patch
-        results.append('    - ./' + patches_path + ':' + patches_mountpoint + '\n')
-    # This one is added at the end for consistency of end-users' reading; it does NOT require multiple types of permissions.
-    results.append('    - ./emerge.logs:/var/log/portage\n')
     # Here we loop over the all the files in the portage directory and add them.
-    portage_tgt = '/etc/portage/'
-    #if os.path.exists(portage_output_path + '/patches'):
-    #    print('EXISTS')
-    #else:
-    #    print('NOPE')
     for (dirpath, directories, files) in os.walk(portage_output_path):
         for f in files:
             if not f[0] == '.' and not f == 'README.md':

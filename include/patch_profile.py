@@ -5,8 +5,8 @@ from .gentoomuch_common import output_path, portage_output_path, image_tag_base,
 from .read_file_lines import read_file_lines
 
 
-def patch_profile(arch, profile):
-    p = os.path.join(topatch_config_path, arch, profile)
+def patch_profile(profile):
+    p = os.path.join(topatch_config_path, profile)
     if os.path.isfile(p):
         for candidate in read_file_lines(p):
             candidate = candidate.strip()
@@ -15,8 +15,12 @@ def patch_profile(arch, profile):
             if os.path.exists(candidate_dir):
                 final_patches_output = os.path.join(patches_output_path, candidate)
                 if os.path.isdir(final_patches_output):
-                    os.system('rm -rf ' + final_patches_output)
+                    code = os.system('rm -rf ' + final_patches_output)
+                    if code == 0:
+                        pass
                 print("Applying patch: " + candidate)
-                os.system("mkdir -p " + final_patches_output + " && rsync -aHX " + candidate_dir + "/* " + final_patches_output)
+                code = os.system("mkdir -p " + final_patches_output + " && rsync -aHX " + candidate_dir + "/* " + final_patches_output)
+                if code == 0:
+                    pass
             else:
                 exit("Cannot apply nonexistent patch: " + candidate)

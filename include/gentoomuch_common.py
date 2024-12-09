@@ -47,7 +47,7 @@ active_image_tag		        = image_tag_base + 'current:latest'
 dockerized_username             = 'gentoomuch-user'
 usage_str                       = "    gentoomuch "
 # Patches
-patches_mountpoint              = '/home/' + dockerized_username + '/ebuild_exports'
+patches_mountpoint              = os.path.join('/mnt', 'patches')
 patches_workdir                 = os.path.join(output_path, 'patches.work')
 patches_in_progress_dir         = os.path.join(output_path, 'patches.in.progress')
 saved_patches_path		        = os.path.join(config_path, 'user.patches')

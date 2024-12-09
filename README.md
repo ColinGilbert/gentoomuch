@@ -1,5 +1,6 @@
 <p>
-STATUS: Almost ready to drop... This thing should be at initial operational capability within a week! Then, cleanup, system tests, documentation, release! This means that for practical reasons the documentation might not always be in-sync and that features aren't all yet complete; also, while this tool is pleasant there are still a few janky bits to grind out.
+STATUS: Currently updating it to work correctly after three years' hiatus
+
 </p>
 <h3>GentooMuch: Because something like this was bound to happen...</h3>
 
@@ -16,20 +17,14 @@ Gentoo Linux has been cast as intimidating and error-prone, and this toolkit aim
 GentooMuch aims to to dovetail into the existing ecosystem by being very carefully designed for minimum intrusiveness: Due to being greatly inspired by Gentoo's existing workflows, its patterns should be implicitly relatable to existing users. The tool also feels a bit like using the Docker command and that is no coincidence. I didn't want this tool to jam up a workflow.
 </p>
 <h4>This tool is just made to be played with.</h4>
-In fact, to setup, just call
-<pre>gentoomuch sync</pre>
-in order to get the Portage directory. It then packs a squashfs for faster future work and mounts it for you. Then, you check out available profiles with
-<pre>gentoomuch profile ls</pre>
-set one with
-<pre>gentoomuch profile set</pre>
-and finally you bootstrap it with
-<pre>gentoomuch bootstrap</pre>
+In fact, to setup, just download your stage3, .DIGEST, and .asc, and call
+<pre>gentoomuch bootstrap profile_name stage3-*.tar.xz</pre>
 This creates an optimized builder, which will benefit from all future improvements to this build system. You then enter into an fresh sandbox environment with
 <pre>gentoomuch freshroot</pre>
 and start emerging packages right away! It'll keep the built ones so you won't have to recompile them from scratch again.
 </p>
 <p>
-We support the important use-case of prepping and using patches when your profile breaks; if upstream has a package broken on the minimalistic and marginally-supported libc you're using on your tricked-out home router or your wierdo edge-case FPGA-optimized minimalistic ultrasecured AI system, and you need to quickly make it work, just go
+We support the important use-case of prepping and using patches when your profile breaks; if upstream has a package broken on the minimalistic and marginally-supported libc you're using on your tricked-out home router or your edge-case FPGA-optimized system, and you need to quickly make it work, just go
 <pre>gentoomuch patch prep</pre>
 You work in the directory that gets automatically prepared for your convenience, and then you try compiling the patched package with
 <pre>gentoomuch patch try</pre>

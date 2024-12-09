@@ -14,7 +14,7 @@ from .get_gentoomuch_uid import get_gentoomuch_uid
 from .get_gentoomuch_gid import get_gentoomuch_gid
 from .get_gentoomuch_jobs import get_gentoomuch_jobs
 
-def save_tarball(arch, profile, stage_define, upstream: bool):
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool):
     # Important to swap our active stage first!
     swap_stage(arch, profile, stage_define, bool(upstream))
     archive_name = get_local_tarball_name(arch, profile, stage_define)
@@ -32,7 +32,7 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     gid = get_gentoomuch_gid()
     jobs = get_gentoomuch_jobs();
     print('PACKAGES TO INSTALL : ' + packages_str)
-      # The following dogs' meal of a command preps a stage inside a docker container. It then changes root into it and emerges. Then, it exits the chroot, unmounts all tempories, and packs a tarball as "stage3-<arch>-<base>-<user-stage-define>.tar.xz"
+      # The following dogs' meal of a command preps a stage inside a docker container. It then changes root into it and emerges. Then, it exits the chroot, unmounts all tempories, and packs a tarball as "stage3-<arch>-<base>-<user-stage-define>.tar.gz"
     cmd_str = "cd " + output_path + " && "
     cmd_str += "docker-compose run gentoomuch-builder-privileged /bin/bash -c \""
     cmd_str += "emerge pigz && "
@@ -61,7 +61,7 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     cmd_str += "emerge -j" + jobs + (" --emptytree " if upstream else " -uD --changed-used --newuse ") + packages_str + "@world && "
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot
-    cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
+    #cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
     # cmd_str += "umount -fl /mnt/gentoo/var/tmp/portage && "
     # cmd_str += "chown 1000:1000 -R /var/tmp/portage/* && "
     cmd_str += "umount -fl /mnt/gentoo/tmp && "
@@ -79,7 +79,7 @@ def save_tarball(arch, profile, stage_define, upstream: bool):
     if not code == 0:
         exit("FAILED TO CREATE TARBALL: " + archive_name)
     print('CREATING CONTAINER FROM: ' + archive_name)
-    # The following call to containerize() had me a little tripped until thought of it. Here is why:
+    # The following call to containerize() had me a little tripped-up until thought of it. Here is why:
     #    It would be a mistake to passthrough the arguments' "upstream" variable in this particular context.
     #       By definition, a stage that's being saved from a Docker container has already been ingested and turned into something local.
     #    This property holds even when the binaries inside that dockerized stage come from upstream.
