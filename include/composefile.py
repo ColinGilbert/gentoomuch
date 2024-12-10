@@ -88,8 +88,6 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
             if not f[0] == '.' and not f == 'README.md':
                 rel_path = os.path.relpath(dirpath, output_path)
                 results.append('    - ./' + os.path.join(rel_path, f) + ':' + os.path.join('/etc/', rel_path, f) + ':ro\n')
-    patches_output_path = os.path.join(portage_output_path, "patches")
-    for (dirpath, directories, files) in os.walk(patches_output_path):
     if is_builder_privileged:
         results.append('    cap_add:\n')
         results.append('    - CAP_SYS_ADMIN\n')
