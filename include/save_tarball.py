@@ -13,11 +13,17 @@ from .containerize import containerize
 from .get_gentoomuch_uid import get_gentoomuch_uid
 from .get_gentoomuch_gid import get_gentoomuch_gid
 from .get_gentoomuch_jobs import get_gentoomuch_jobs
+from .package_from_patch import package_from_patch
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool):
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patch: str = '', patch_has_been_compiled: bool = True):
     # Important to swap our active stage first!
     swap_stage(arch, profile, stage_define, bool(upstream))
     archive_name = get_local_tarball_name(arch, profile, stage_define)
+    if patch != '':
+        valid, package = package_from_patch(patch)
+        if not valid:
+            print("save_tarball: Invalid patch name " + patch)
+            return False 
     print("CREATING TARBALL: " + archive_name + " Using upstream image: " + str(upstream))
     if os.path.isfile(os.path.join(stages_path, archive_name)):
         os.remove(os.path.join(stages_path, archive_name))
@@ -32,14 +38,14 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool):
     gid = get_gentoomuch_gid()
     jobs = get_gentoomuch_jobs();
     print('PACKAGES TO INSTALL : ' + packages_str)
-      # The following dogs' meal of a command preps a stage inside a docker container. It then changes root into it and emerges. Then, it exits the chroot, unmounts all tempories, and packs a tarball as "stage3-<arch>-<base>-<user-stage-define>.tar.gz"
+      # The following dogs' meal of a command preps a stage inside a docker container. It then changes root into it and emerges. Then, it exits the chroot, unmounts all temporaries, and packs a tarball as "stage3-<arch>-<base>-<user-stage-define>.tar.gz"
     cmd_str = "cd " + output_path + " && "
     cmd_str += "docker-compose run gentoomuch-builder-privileged /bin/bash -c \""
     cmd_str += "emerge pigz && "
     cmd_str += "cd /mnt/gentoo && "
     cmd_str += "mkdir -p /mnt/gentoo/etc/portage &&"
     cmd_str += "tar xpf /stage3-* --xattrs-include='*.*' --numeric-owner && "
-    #cmd_str += "rm -rf /mnt/gentoo/etc/portage/* && "
+    cmd_str += "rm -rf /mnt/gentoo/etc/portage/* && "
     cmd_str += "rsync -aXH /etc/portage/* /mnt/gentoo/etc/portage/ && "
     cmd_str += "mount -t proc none /mnt/gentoo/proc && "
     cmd_str += "mount -t tmpfs none /mnt/gentoo/tmp && "
@@ -58,7 +64,15 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool):
     cmd_str += "chroot . /bin/bash -c '" # Enter chroot
     cmd_str += "env-update && "
     cmd_str += ". /etc/profile && "
-    cmd_str += "emerge -j" + jobs + (" --emptytree " if upstream else " -uD --changed-used --newuse ") + packages_str + "@world && "
+    cmd_str += "emerge --with-bdeps=y -j" + jobs + (" --emptytree " if upstream else " -uD --changed-use --newuse ") + packages_str + "@world && "
+    if patch != '':
+        valid, package = package_from_patch(patch)
+        if valid:
+            if patch_has_been_compiled:
+                cmd_str += "emerge -j8" + jobs + " emerge =" + package + " && "
+            else:
+                cmd_str += "emerge -j8" + jobs + " emerge --usepkg n =" + package + " && "
+    #cmd_str += "emerge --depclean --with-bdeps=n && " # Remove build deps
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot
     #cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
@@ -74,7 +88,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool):
     cmd_str += "cd /mnt/gentoo && "
     cmd_str += "tar -cf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls && "
     cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
-    cmd_str +=  "\""
+    cmd_str += "\""
     code = os.system(cmd_str)
     if not code == 0:
         exit("FAILED TO CREATE TARBALL: " + archive_name)

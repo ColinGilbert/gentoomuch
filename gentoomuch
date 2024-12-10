@@ -39,6 +39,7 @@ all_str         = 'all'
 prep_str        = 'prep'
 try_str         = 'try'
 save_str        = 'save'
+apply_str       = 'apply'
 
 
 # First word after the "gentoomuch" command.
@@ -79,6 +80,7 @@ def print_usage_patch():
     print(patch_usage + prep_str + '  <name> <package> <version-str>')
     print(patch_usage + try_str + ' <name>')
     print(patch_usage + save_str + ' <name>')
+    print(patch_usage + apply_str + ' <name>')
 
 def print_no_profile():
     print("You need to set a base profile before continuing.")
@@ -174,12 +176,15 @@ elif prime_cmd == patch_str:
         print_usage_patch()
     if len(sys.argv) > 2 and sys.argv[2] == prep_str:
         ui_patch_prep_handler(3).handle()
-    # We try a patch that is currently being worked upon.
     elif len(sys.argv) > 2 and sys.argv[2] == try_str:
         if len(sys.argv) > 3:
             patch_name = sys.argv[3]
             #print(patch_name)
-            try_patch(patch_name)
+            valid, profile = get_desired_profile()
+            if valid:
+                try_patch(profile, patch_name)
+            else:
+                exit("Need to have a profile set.")
         else:
             print("You need to provide a patch name to try.")
     # We save a patch to our config/patches directory
@@ -189,6 +194,15 @@ elif prime_cmd == patch_str:
             save_patch(patch_name)
         else:
             exit("Which patch do you wish to save?")
+    elif len(sys.argv) > 2 and sys.argv[2] == apply_str:
+        if len(sys.argv) > 3:
+            patch_name = sys.argv[3]
+            profiles = get_profiles()
+            for profile in profiles: 
+                save_tarball(arch, profile, "gentoomuch/builder", False, patch_name, False)
+                #TODO: Add the rest in the pipeline
+        else:
+            exit("Which patch to apply to your pipelines?")
     exit()
 ##################################
 # Deal with the freshroot command. 

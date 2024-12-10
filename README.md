@@ -26,13 +26,11 @@ and start emerging packages right away! It'll keep the built ones so you won't h
 <p>
 We support the important use-case of prepping and using patches when your profile breaks; if upstream has a package broken on the minimalistic and marginally-supported libc you're using on your tricked-out home router or your edge-case FPGA-optimized system, and you need to quickly make it work, just go
 <pre>gentoomuch patch prep</pre>
-You work in the directory that gets automatically prepared for your convenience, and then you try compiling the patched package with
+You work in the directory that gets automatically prepared for your convenience, ./gentoomuch-data/patches.in.progress and then you try compiling the patched package with
 <pre>gentoomuch patch try</pre>
 until it works. Once you're done, just use
 <pre>gentoomuch patch save</pre>
-and you'll be able to make use of it across any of your profiles after defining it as a file in
-</pre>config/patch.profiles</pre>
-</p>
+and you'll be able to make use of it across all of your profiles.
 <p>
 It does all the unpacking and diffing and file copying for you. That way, you can have a working system until upstream gets its act together! ;) Pro tip: If you want them to fix the problem, send them the patch once you know it works...
 </p>

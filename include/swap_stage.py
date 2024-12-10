@@ -9,16 +9,14 @@ from .portage_directory_combiner import portage_directory_combiner
 from .get_docker_tag import get_docker_tag
 from .composefile import create_composefile
 from .write_file_lines import write_file_lines
-from .patch_profile import patch_profile
-
+from .apply_saved_patches import apply_saved_patches
 
 def swap_stage(arch : str, profile : str, stage_def : str, upstream : bool, patch_to_test: str = ''):
     os.system('cd ' + output_path + ' && docker-compose down')
     # We assemble our (temporary) Portage directory from stages.
     combiner = portage_directory_combiner()
     combiner.process_stage_defines(stage_def)
-    # We now add patches, per profile.
-    patch_profile(profile)
+    # We now add patches
     dckr = docker.from_env()
     dckr_imgs = dckr.images.list()
     found = False
@@ -29,7 +27,7 @@ def swap_stage(arch : str, profile : str, stage_def : str, upstream : bool, patc
     if code == 0:
         pass
     for i in dckr_imgs:
-        # print(i)
+        #print(i.tags)
         if t in i.tags:
             cmd = "docker image tag " + t + " " + active_image_tag
             code = os.system(cmd)
@@ -49,7 +47,10 @@ def swap_stage(arch : str, profile : str, stage_def : str, upstream : bool, patc
     if 'hooks' in combiner.todo:
         if len(combiner.todo['hooks']) > 0:
             write_file_lines(desired_hooks_path, combiner.todo['hooks'])
-    create_composefile(output_path, patch_to_test)
+    apply_saved_patches()
+    results = create_composefile(output_path, patch_to_test)
+    if results:
+        pass
     code = os.system('cd ' + output_path + ' && docker-compose up --no-start')
     if code == 0:
         pass

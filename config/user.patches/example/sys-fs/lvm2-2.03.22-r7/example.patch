@@ -1,0 +1,11 @@
+--- a/scripts/lvm2create_initrd/lvm2create_initrd
++++ b/scripts/lvm2create_initrd/lvm2create_initrd
+@@ -57,7 +57,7 @@ DEVRAM=/tmp/initrd.$$
+ BINFILES=${BINFILES:-"`which lvm` `which bash` `which busybox` `which pivot_root`"}
+ BASICDEVICES=${BASICDEVICES:-"std consoleonly fd"}
+ BLOCKDEVICES=${BLOCKDEVICES:-"md hda hdb hdc hdd sda sdb sdc sdd"}
+-MAKEDEV=${MAKEDEV:-"debian"}
++MAKEDEV=${MAKEDEV:-"gentoo"}
+ 
+ # Uncomment this if you want to disable automatic size detection
+ #INITRDSIZE=4096

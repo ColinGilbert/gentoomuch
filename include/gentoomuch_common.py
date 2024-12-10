@@ -32,6 +32,7 @@ pkgset_path				    	= os.path.join(config_path, 'package.sets')
 local_config_basepath	        = os.path.join(config_path, 'portage.locals')
 hooks_path				        = os.path.join(config_path, 'build.hooks')
 kernel_path				        = os.path.join(config_path, 'kernel.configs')
+saved_patches_path		        = os.path.join(config_path, 'user.patches')
 # Environment settings (ie: Stuff you set and forget.)
 env_settings_path               = os.path.join(config_path, 'env')
 arch_config_path		        = os.path.join(env_settings_path, 'arch')
@@ -47,8 +48,5 @@ active_image_tag		        = image_tag_base + 'current:latest'
 dockerized_username             = 'gentoomuch-user'
 usage_str                       = "    gentoomuch "
 # Patches
-patches_mountpoint              = os.path.join('/mnt', 'patches')
+patches_export_mountpoint       = os.path.join('/mnt', 'patches')
 patches_workdir                 = os.path.join(output_path, 'patches.work')
-patches_in_progress_dir         = os.path.join(output_path, 'patches.in.progress')
-saved_patches_path		        = os.path.join(config_path, 'user.patches')
-topatch_config_path             = os.path.join(config_path, 'patch.profiles')

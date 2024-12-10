@@ -36,7 +36,7 @@ def containerize(tarball_path : str, arch : str, profile : str, stagedef : str, 
     open(dockerfile, 'w').write(bootstrap_dockerfile(tarball_name, profile))
     code = os.system('cp ' + tarball_path + ' ' +  new_tarball_path)
     if code != 0:
-        print("Could not copy tarball from " + old_tarball_path + " to " + new_tarball_path)
+        print("Could not copy tarball from " + tarball_path + " to " + new_tarball_path)
         return False
     # We then import our bootstrap image, and build a new one using our dockerfile.
     # Then we get rid of the old bootstrap image.
@@ -54,10 +54,9 @@ def containerize(tarball_path : str, arch : str, profile : str, stagedef : str, 
     #os.system('mv ' + new_tarball_path + ' ' + old_tarball_path)
     if code == 0:
         print("INFO: Succesfully dockerized " + desired_tag)
-        profiles = get_profiles()
+        profiles = set(get_profiles())
         if profile not in profiles:
-            profiles.append(profile)
-            profiles.sort()
+            profiles.add(profile)
             save_profiles(profiles)
         return True
     else:
