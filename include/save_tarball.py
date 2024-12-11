@@ -69,9 +69,9 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         valid, package = package_from_patch(patch)
         if valid:
             if patch_has_been_compiled:
-                cmd_str += "emerge -j8" + jobs + " emerge =" + package + " && "
+                cmd_str += "emerge -j8" + jobs + " emerge --oneshot =" + package + " && "
             else:
-                cmd_str += "emerge -j8" + jobs + " emerge --usepkg n =" + package + " && "
+                cmd_str += "emerge -j8" + jobs + " emerge --oneshot --usepkg n =" + package + " && "
     #cmd_str += "emerge --depclean --with-bdeps=n && " # Remove build deps
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot

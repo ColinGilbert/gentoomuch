@@ -23,7 +23,7 @@ def bootstrap_dockerfile(tarball_name: str, profile: str) -> str:
     results += '&& groupadd -g 1000 ' + dockerized_username + '\\\n'
     results += '&& useradd -m -u 1000 -g 1000 -G portage ' + dockerized_username + ' \\\n'
     results += '&& mkdir ' + patches_export_mountpoint +  ' \\\n'
-    results += '&& chown -R ' + uid + ':' + gid + ' ' + patches_mount_export_point + '\n'
+    results += '&& chown -R ' + uid + ':' + gid + ' ' + patches_export_mountpoint + '\n'
     # results += '&& USER ' + dockerized_username
     #results += 'WORKDIR /home/' + dockerized_username + '\n'
     results += 'CMD /bin/bash'
