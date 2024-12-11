@@ -188,7 +188,7 @@ elif prime_cmd == patch_str:
             else:
                 exit("Need to have a profile set.")
         else:
-            print("You need to provide a patch name to try.")
+            exit("You need to provide a patch name to try.")
     # We save a patch to our config/patches directory
     elif len(sys.argv) > 2 and sys.argv[2] == save_str:
         if len(sys.argv) > 3:
@@ -201,11 +201,13 @@ elif prime_cmd == patch_str:
             patch_name = sys.argv[3]
             profiles = get_profiles()
             for profile in profiles: 
-                save_tarball(arch, profile, "gentoomuch/builder", False, patch_name, False)
+                results = save_tarball(arch, profile, "gentoomuch/builder", False, patch_name, False)
+                if results:
+                    pass
                 #TODO: Add the rest in the pipeline
-                remove_old_docker_images()
         else:
             exit("Which patch to apply to your pipelines?")
+    remove_old_docker_images()
     exit()
 ##################################
 # Deal with the freshroot command. 
