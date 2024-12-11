@@ -167,7 +167,7 @@ elif prime_cmd == bootstrap_str:
         save_tarball(arch, profile, "gentoomuch/builder", True)
     else:
         save_tarball(arch, profile, "gentoomuch/builder", True)
-    remove_old_docker_images()
+    #remove_old_docker_images()
     exit()
 ##################
 # Handle patching.

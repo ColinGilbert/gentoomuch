@@ -164,8 +164,8 @@ def try_patch(profile: str, patch_name : str) -> bool:
         return False
     patch_outdir = os.path.join(portage_output_path, 'patches')
     #print(patch_outdir)
-    cmd_str = 'emerge --onlydeps --binpkg =' + package_name + ' && '
-    cmd_str = "emerge --usepkg n =" + package_name
+    cmd_str = 'emerge --onlydeps =' + package_name + ' && '
+    cmd_str += "emerge --usepkg n =" + package_name
     if valid:
         swap_stage(get_arch(), profile, 'gentoomuch/builder', False, str(patch_name))
         #code = os.system('cp -R ' + os.path.join(saved_patches_path, patch_name, '*') + ' ' + patch_outdir)#send_diff(patches_workdir, patch_outdir, patch_name)
