@@ -207,7 +207,6 @@ elif prime_cmd == patch_str:
                 #TODO: Add the rest in the pipeline
         else:
             exit("Which patch to apply to your pipelines?")
-    remove_old_docker_images()
     exit()
 ##################################
 # Deal with the freshroot command. 
