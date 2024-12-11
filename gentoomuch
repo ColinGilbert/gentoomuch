@@ -2,7 +2,7 @@
 
 import os, sys, re
 from typing import Tuple
-from include.gentoomuch_common import arch_config_path, config_path, output_path, usage_str
+from include.gentoomuch_common import arch_config_path, config_path, output_path, usage_str, saved_patches_path
 from include.freshroot import freshroot
 from include.sync import sync, has_sync_happened, set_sync_happened
 from include.swap_stage import swap_stage
@@ -81,7 +81,7 @@ def print_usage_patch():
     print(patch_usage + prep_str + '  <name> <package> <version-str>')
     print(patch_usage + try_str + ' <name>')
     print(patch_usage + save_str + ' <name>')
-    print(patch_usage + apply_str + ' <name>')
+    print(patch_usage + apply_str)
 
 def print_no_profile():
     print("You need to set a base profile before continuing.")
@@ -197,16 +197,19 @@ elif prime_cmd == patch_str:
         else:
             exit("Which patch do you wish to save?")
     elif len(sys.argv) > 2 and sys.argv[2] == apply_str:
-        if len(sys.argv) > 3:
-            patch_name = sys.argv[3]
-            profiles = get_profiles()
-            for profile in profiles: 
-                results = save_tarball(arch, profile, "gentoomuch/builder", False, patch_name, False)
-                if results:
-                    pass
-                #TODO: Add the rest in the pipeline
-        else:
-            exit("Which patch to apply to your pipelines?")
+        patches= []
+        for patch in os.listdir(saved_patches_path):
+            #TODO: Collect patch names into list
+            if patch != "README.md":
+                patches.append(patch)
+        profiles = get_profiles()
+        for profile in profiles: 
+            results = save_tarball(arch, profile, "gentoomuch/builder", False, patches, False)
+            if results:
+               pass
+            #TODO: Add the rest in the pipeline
+    else:
+        print_usage_patch()
     exit()
 ##################################
 # Deal with the freshroot command. 

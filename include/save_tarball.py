@@ -15,15 +15,16 @@ from .get_gentoomuch_gid import get_gentoomuch_gid
 from .get_gentoomuch_jobs import get_gentoomuch_jobs
 from .package_from_patch import package_from_patch
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patch: str = '', patch_has_been_compiled: bool = True):
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True):
     # Important to swap our active stage first!
     swap_stage(arch, profile, stage_define, bool(upstream))
     archive_name = get_local_tarball_name(arch, profile, stage_define)
-    if patch != '':
-        valid, package = package_from_patch(patch)
-        if not valid:
-            print("save_tarball: Invalid patch name " + patch)
-            return False 
+    for patch in patches:
+        if patch != '':
+            valid, package = package_from_patch(patch)
+            if not valid:
+                print("save_tarball: Invalid patch name " + patch)
+                return False 
     print("CREATING TARBALL: " + archive_name + " Using upstream image: " + str(upstream))
     if os.path.isfile(os.path.join(stages_path, archive_name)):
         os.remove(os.path.join(stages_path, archive_name))
@@ -65,14 +66,15 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "env-update && "
     cmd_str += ". /etc/profile && "
     cmd_str += "emerge --with-bdeps=y -j" + jobs + (" --emptytree " if upstream else " -uD --changed-use --newuse ") + packages_str + "@world && "
-    if patch != '':
-        valid, package = package_from_patch(patch)
-        if valid:
-            if patch_has_been_compiled:
-                cmd_str += "emerge -j" + jobs + " --oneshot =" + package + " && "
-            else:
-                cmd_str += "emerge -j" + jobs + " --onlydeps =" + package + " && "
-                cmd_str += "emerge -j" + jobs + " --oneshot --usepkg n =" + package + " && "
+    for patch in patches:
+        if patch != '':
+            valid, package = package_from_patch(patch)
+            if valid:
+                if patches_have_been_compiled:
+                    cmd_str += "emerge -j" + jobs + " --oneshot --oneshot =" + package + " && "
+                else:
+                    cmd_str += "emerge -j" + jobs + " --oneshot --onlydeps =" + package + " && "
+                    cmd_str += "emerge -j" + jobs + " --oneshot --usepkg n =" + package + " && "
     #cmd_str += "emerge --depclean --with-bdeps=n && " # Remove build deps
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot
