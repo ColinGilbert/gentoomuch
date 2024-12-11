@@ -23,6 +23,7 @@ from include.patches import prep_patch, try_patch, save_patch
 from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
 from include.downloader import downloader
 from include.get_profiles import get_profiles
+from include.remove_old_docker_images import remove_old_docker_images
 
 # Our commandline keywords
 ls_str          = 'ls'
@@ -166,6 +167,7 @@ elif prime_cmd == bootstrap_str:
         save_tarball(arch, profile, "gentoomuch/builder", True)
     else:
         save_tarball(arch, profile, "gentoomuch/builder", True)
+    remove_old_docker_images()
     exit()
 ##################
 # Handle patching.
@@ -201,6 +203,7 @@ elif prime_cmd == patch_str:
             for profile in profiles: 
                 save_tarball(arch, profile, "gentoomuch/builder", False, patch_name, False)
                 #TODO: Add the rest in the pipeline
+                remove_old_docker_images()
         else:
             exit("Which patch to apply to your pipelines?")
     exit()
@@ -222,8 +225,12 @@ elif prime_cmd == pipeline_str:
 ####################
 elif prime_cmd == sync_str:
     if has_sync_happened():
-        swap_stage(arch, 'default', 'gentoomuch/builder', True)
-        sync()
+        valid, profile = get_desired_profile()
+        if valid:
+            swap_stage(arch, profile, 'gentoomuch/builder', False)
+            sync()
+        else:
+            exit("Need to select a working profile prior to sync.")
     else:
         exit("Need to bootstrap a stage3 prior to first sync")
 else:

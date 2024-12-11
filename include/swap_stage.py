@@ -22,7 +22,7 @@ def swap_stage(arch : str, profile : str, stage_def : str, upstream : bool, patc
     found = False
     t = get_docker_tag(arch, profile, stage_def, bool(upstream))
     #print("TAG " + t)
-    # print("ATTEMPTING TO SWAP: " + t)
+    print("ATTEMPTING TO SWAP: " + t)
     code = os.system('docker rmi ' + active_image_tag) # To ensure we don't suffer from duplicates.
     if code == 0:
         pass
@@ -51,6 +51,6 @@ def swap_stage(arch : str, profile : str, stage_def : str, upstream : bool, patc
     results = create_composefile(output_path, patch_to_test)
     if results:
         pass
-    code = os.system('cd ' + output_path + ' && docker-compose up --no-start')
+    code = os.system('cd ' + output_path + ' && docker-compose up --quiet-pull --no-start')
     if code == 0:
         pass

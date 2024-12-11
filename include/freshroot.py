@@ -18,6 +18,6 @@ def freshroot():
         print("    Trying to start fresh root with profile " + desired_profile + " and stage definition ")
         #create_composefile(output_path)
         swap_stage(arch, desired_profile, "gentoomuch/builder", False) 
-        os.system("cd " + output_path + " && docker-compose up --no-start && docker-compose run gentoomuch-builder /bin/bash")
+        os.system("cd " + output_path + " && docker-compose up --quiet-pull --no-start && docker-compose run gentoomuch-builder /bin/bash")
     else:
         print("You need to set a profile prior to starting a fresh root.")

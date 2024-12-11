@@ -15,13 +15,11 @@ from .save_profiles import save_profiles
 def containerize(tarball_path : str, arch : str, profile : str, stagedef : str, upstream : bool) -> bool:
     # This tag is used to name an image that is imported as a bootstrap image.
     bootstrap_tag = image_tag_base + "bootstrap:latest"
-    desired_tag = get_docker_tag(arch, profile, stagedef, bool(upstream))
+    desired_tag = get_docker_tag(arch, profile, stagedef, upstream)
+    temp_tag = get_docker_tag(arch, profile, stagedef, upstream, True)
     #print("Containerize... desired tag = " + desired_tag)
     # Which directory do we use to build?
     # If it exists, we're doing an update and thus we remove.
-    # TODO: Replace with renaming and allow recovery from backup.
-    if docker_stage_exists(arch, profile, stagedef, bool(upstream)):
-        os.system("docker image rm -f " + desired_tag)
     bootstrap_dir = os.path.join(output_path, 'bootstrap')
     dockerfile = os.path.join(bootstrap_dir, 'Dockerfile')
     os.makedirs(bootstrap_dir, exist_ok = True)
@@ -44,6 +42,11 @@ def containerize(tarball_path : str, arch : str, profile : str, stagedef : str, 
     if code != 0:
         print("Could not import tarball " + tarball_name)
         return False
+    # TODO: Replace with renaming and allow recovery from backup.
+    if docker_stage_exists(arch, profile, stagedef, upstream):
+        code = os.system("docker rmi " + desired_tag)
+        if code == 0:
+            pass
     code = os.system("docker build -t " + desired_tag + " " + bootstrap_dir)
     if code != 0:   
         print("Could not docker-build")
