@@ -28,8 +28,12 @@ from include.remove_old_docker_images import remove_old_docker_images
 # Our commandline keywords
 ls_str          = 'ls'
 set_str         = 'set'
+get_str         = 'get'
+rm_str          = 'rm'
 sync_str        = 'sync'
 patch_str       = 'patch'
+config_str      = 'config'
+build_str       = 'build'
 pipeline_str    = 'pipeline'
 freshroot_str   = 'freshroot'
 bootstrap_str   = 'bootstrap'
@@ -40,11 +44,12 @@ all_str         = 'all'
 prep_str        = 'prep'
 try_str         = 'try'
 save_str        = 'save'
+clean_str       = 'clean'
 apply_str       = 'apply'
-
-
+kernel_str      = 'kernel'
+sources_str     = 'sources'
 # First word after the "gentoomuch" command.
-primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str )
+primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str )
 # Commands you can use ls and set to visualize and manipulate.
 #ls_and_set_usedwiths = (profile_str, stage_str)
 # 
@@ -53,25 +58,17 @@ primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_st
 # Here we define CLI help functions for when the user needs it.
 
 # Print usage_str messages.
-def print_usage_stage_ls():
+def print_usage_stage():
     print(usage_str + stage_str + ' ' + ls_str)
-
-def print_usage_stage_set():
     print(usage_str + stage_str + ' ' + set_str + ' <name>')
 
-def print_usage_profile_ls():
-    print(usage_str + profile_str + ' ' + ls_str)
-
-def print_usage_profile_set():
-    print(usage_str + profile_str + ' ' + set_str + ' <name>')
-
-def print_usage_stage():
-    print_usage_stage_ls()
-    print_usage_stage_set()
+def print_usage_kernel():
+    print(usage_str + kernel_str + ' ' + prep_str + ' <kernel.defines.name>')
+    print(usage_str + kernel_str + ' ' + build_str + ' <kernel.defines.name>')
 
 def print_usage_profile():
-    print_usage_profile_ls()
-    print_usage_profile_set()
+    print(usage_str + profile_str + ' ' + ls_str)
+    print(usage_str + profile_str + ' ' + set_str + ' <name>')
 
 def print_usage_bootstrap():
     print(usage_str + bootstrap_str + ' <profile> <tarball>')
@@ -93,6 +90,8 @@ def print_usage():
     print_usage_bootstrap()
     print_usage_profile()
     print_usage_stage()
+    print_usage_kernel()
+    print(usage_str + clean_str)
 
 # We do this every time!
 arch = open(arch_config_path).read().strip()
@@ -211,6 +210,18 @@ elif prime_cmd == patch_str:
     else:
         print_usage_patch()
     exit()
+##############################
+# Handle kernel-related tasks   
+##############################
+elif prime_cmd == kernel_str:
+    if len(sys.argv) > 2 and sys.argv[2] == config_str:
+        # TODO: Add config 
+        pass
+    elif len(sys.argv) > 2 and sys.argv[2] == build_str:
+        # TODO: Add build
+        pass
+    else:
+        print_usage_kernel()
 ##################################
 # Deal with the freshroot command. 
 ##################################
@@ -237,5 +248,7 @@ elif prime_cmd == sync_str:
             exit("Need to select a working profile prior to sync.")
     else:
         exit("Need to bootstrap a stage3 prior to first sync")
+elif prime_cmd == clean_str:
+    remove_old_docker_images()
 else:
     print_usage()

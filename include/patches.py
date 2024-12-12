@@ -20,47 +20,12 @@ def validate_package_format(package : str) -> bool:
         return False
     return True
 
-
-def get_patches_in_progress():
-    if not os.path.isdir(patches_workdir):
-        os.makedirs(patches_workdir, exist_ok = True)
-    for root, dirs,files in os.walk(patches_wprldir):
-        for f in files:
-            print(f)
-
-
-def send_diff(path_from: str, path_to : str, patch_name : str) -> bool:
-    valid, versioned_package = package_from_patch(patch_name)
-    if not valid == True:
-        print("Send diff: Could not derive package name") 
-        return False
-    print("Send diff: " + versioned_package)
-    base_path = os.path.join(path_from, patch_name, versioned_package)
-    for d in os.listdir(base_path):
-        print(d)
-    final_path = os.path.join(base_path, d)
-    print("PATCH PATH: " + final_path)
-    repo = git.Repo(final_path)
-    # Get first commit.
-    first_commit = list(repo.iter_commits('master'))[-1]
-    num_backtracks = len(versioned_package.split('/'))
-    final_output_dir = os.path.join(path_to, versioned_package)
-    os.system("cd " + final_path + " && git diff " + first_commit.hexsha + " | grep -v '^diff\|^index' | tee ." + patch_name + ".patch")
-    if os.path.isdir(final_output_dir) and len(os.listdir(final_output_dir)) > 0:
-        print("While sending the patch diff, another directory was found and it is not empty!")
-        os.system('rm -rf ' + os.path.join(final_output_dir,'*'))
-    os.makedirs(final_output_dir, exist_ok = True)
-    shutil.move(os.path.join(final_path, '.' + patch_name + '.patch'), os.path.join(final_output_dir,  patch_name + '.patch'))
-    return True
-
-
 def strip_version(package_name) -> str:
     return re.sub('-[0-9.]+$', '', strip_version_tag(package_name))
     
 
 def strip_version_tag(package_name) -> str:
     return re.sub('-r[0-9]+$', '', package_name)
-
 
 # Here, we will do the tooling required for you to start patching a given package+version
 # Then it unpacks your ebuild into it, and initializes the git repository for patching
@@ -138,43 +103,50 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
             pass
     return True
 
-
-#def list_available_package_versions(package: str, repo_name = ''):
-#    if not validate_package_format(package):
-#        exit("Could not read package version")
-#    repo_name = 'gentoo' if repo_name == '' else repo_name
-#    cmd_str = 'ls -alh $(portageq get_repo_path / ' + repo_name + ')/' + package
-#    code = os.system('cd ' + output_path + ' && docker-compose run -u ' + get_gentoomuch_uid() + " gentoomuch-builder /bin/bash -c '" + cmd_str + "'")
-    
-
 def save_patch(patch_name : str) -> bool:
     p = os.path.join(saved_patches_path, patch_name)
     if not os.path.isdir(p):
         os.makedirs(p, exist_ok = True)
-    send_diff(patches_workdir, p, patch_name)
+    _send_diff(patches_workdir, p, patch_name)
     return True
 
-
-
-
 def try_patch(profile: str, patch_name : str) -> bool:
-    valid, package_name = package_from_patch(patch_name)
+    valid, package_name = package_from_patch(patch_name, True)
     if not valid:
         print("Invalid patch name entered. Stopping.")
         return False
     patch_outdir = os.path.join(portage_output_path, 'patches')
-    #print(patch_outdir)
     cmd_str = 'emerge --onlydeps =' + package_name + ' && '
     cmd_str += "emerge --usepkg n =" + package_name
     if valid:
         swap_stage(get_arch(), profile, 'gentoomuch/builder', False, str(patch_name))
-        #code = os.system('cp -R ' + os.path.join(saved_patches_path, patch_name, '*') + ' ' + patch_outdir)#send_diff(patches_workdir, patch_outdir, patch_name)
-        # create_composefile(output_path)
-        # if code == 0:
-        #     pass
         code = os.system("cd " + output_path + " && docker-compose run gentoomuch-builder /bin/bash -c '" + cmd_str + "'")
         if code == 0:
             pass
         return True
     print("TRY_PATCH:: Could not try patch " + patch_name)
     return False
+
+def _send_diff(path_from: str, path_to : str, patch_name : str) -> bool:
+    valid, versioned_package = package_from_patch(patch_name, True)
+    if not valid == True:
+        print("Send diff: Could not derive package name") 
+        return False
+    print("Send diff: " + versioned_package)
+    base_path = os.path.join(path_from, patch_name, versioned_package)
+    for d in os.listdir(base_path):
+        print(d)
+    final_path = os.path.join(base_path, d)
+    print("PATCH PATH: " + final_path)
+    repo = git.Repo(final_path)
+    # Get first commit.
+    first_commit = list(repo.iter_commits('master'))[-1]
+    num_backtracks = len(versioned_package.split('/'))
+    final_output_dir = os.path.join(path_to, versioned_package)
+    os.system("cd " + final_path + " && git diff " + first_commit.hexsha + " | grep -v '^diff\|^index' | tee ." + patch_name + ".patch")
+    if os.path.isdir(final_output_dir) and len(os.listdir(final_output_dir)) > 0:
+        print("While sending the patch diff, another directory was found and it is not empty!")
+        os.system('rm -rf ' + os.path.join(final_output_dir,'*'))
+    os.makedirs(final_output_dir, exist_ok = True)
+    shutil.move(os.path.join(final_path, '.' + patch_name + '.patch'), os.path.join(final_output_dir,  patch_name + '.patch'))
+    return True

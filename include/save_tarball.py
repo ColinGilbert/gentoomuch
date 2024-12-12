@@ -21,7 +21,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     archive_name = get_local_tarball_name(arch, profile, stage_define)
     for patch in patches:
         if patch != '':
-            valid, package = package_from_patch(patch)
+            valid, package = package_from_patch(patch, False)
             if not valid:
                 print("save_tarball: Invalid patch name " + patch)
                 return False 
@@ -68,7 +68,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "emerge --with-bdeps=y -j" + jobs + (" --emptytree " if upstream else " -uD --changed-use --newuse ") + packages_str + "@world && "
     for patch in patches:
         if patch != '':
-            valid, package = package_from_patch(patch)
+            valid, package = package_from_patch(patch, False)
             if valid:
                 if patches_have_been_compiled:
                     cmd_str += "emerge -j" + jobs + " --oneshot --oneshot =" + package + " && "

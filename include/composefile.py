@@ -37,7 +37,6 @@ def create_composefile(output_path : str, exporting_patch : str = ''):
     write_file_lines(os.path.join(output_path, 'docker-compose.yml'), lines)
     return True
 
-
 def __output_config(container_type_str : str, exporting_patch : str = ''):
     if not container_type_str in containers:
         sys.exit('Gentoomuch.create-composefile: Invalid container type argument \"' + container_type_str  +  '\"')

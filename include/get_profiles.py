@@ -6,6 +6,7 @@ def get_profiles():
     with open(profiles_path, 'r') as file:
         profiles = file.readlines()
         for p in profiles:
-            results.append(p.strip())
+            if p.strip() != '':
+                results.append(p.strip())
 
     return results

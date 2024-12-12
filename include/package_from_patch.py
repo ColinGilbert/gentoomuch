@@ -1,10 +1,13 @@
 import os
-from .gentoomuch_common import patches_workdir 
+from .gentoomuch_common import saved_patches_path, patches_workdir
 
-def package_from_patch(patch_name : str) -> bool:
+def package_from_patch(patch_name : str, from_workdir: bool) -> bool:
     if patch_name == '':
         return (False, '')
-    patch_in_progress = os.path.join(patches_workdir, patch_name)
+    if from_workdir:
+        patch_in_progress = os.path.join(patches_workdir, patch_name)
+    else:
+        patch_in_progress = os.path.join(saved_patches_path, patch_name)
     if len(os.listdir(patch_in_progress)) > 0:
         package_class_name = os.listdir(patch_in_progress)[0]
         package_class_path = os.path.join(patch_in_progress, package_class_name)
