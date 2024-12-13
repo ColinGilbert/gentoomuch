@@ -56,7 +56,7 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
     #################################################################################################################################
     temp_sourcedir                  = os.path.join(patches_export_mountpoint, 'TEMP')
     final_destination               = os.path.join(patches_export_mountpoint, versioned_package)
-    where_all_the_actual_code_is    = os.path.join(patches_export_mountpoint, 'portage', versioned_package, 'work', '*')  #re.sub('-', '.', versioned_package_notag.split('/')[-1].upper()))
+    where_all_the_actual_code_is    = os.path.join(patches_export_mountpoint, 'portage', versioned_package, 'work', '*')
     # Now we assemble the actual command string.
     # Now we can spin up a docker and unpack that patch into the workdir.
     #TODO Change to desired profile
@@ -66,12 +66,7 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
     else:
         print("Prep patch: Could not get profile")
         return False
-    print("PATCHING: " +
-     "\n patch_export_hostdir: " + patch_export_hostdir +
-     "\n patches_export_mountpoint " + patches_export_mountpoint + 
-     "\n temp_sourcedir: "+ temp_sourcedir + 
-     "\n final_destination: " + final_destination + 
-     "\n where_all_the_actual_code_is: " + where_all_the_actual_code_is)
+    print("PATCHING")
     # We build the cmd_str
     cmd_str += 'mkdir -p ' + temp_sourcedir + ' && '
     cmd_str += 'mv ' + where_all_the_actual_code_is + ' ' + temp_sourcedir + ' && '

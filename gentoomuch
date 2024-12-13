@@ -21,9 +21,10 @@ from include.save_tarball import save_tarball
 from include.load_tarball import load_tarball
 from include.patches import prep_patch, try_patch, save_patch
 from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
-from include.downloader import downloader
 from include.get_profiles import get_profiles
 from include.remove_old_docker_images import remove_old_docker_images
+from include.prep_kernel_config import prep_kernel_config
+from include.kernel_sources_name_converter import kernel_sources_name_converter, test_kernel_sources_name_converter
 
 # Our commandline keywords
 ls_str          = 'ls'
@@ -162,7 +163,8 @@ elif prime_cmd == bootstrap_str:
         code = sync()
         if code != 0:
             exit("Could not sync")
-        set_sync_happened()
+        else:
+            set_sync_happened()
         save_tarball(arch, profile, "gentoomuch/builder", True)
     else:
         save_tarball(arch, profile, "gentoomuch/builder", True)
@@ -214,9 +216,10 @@ elif prime_cmd == patch_str:
 # Handle kernel-related tasks   
 ##############################
 elif prime_cmd == kernel_str:
-    if len(sys.argv) > 2 and sys.argv[2] == config_str:
-        # TODO: Add config 
-        pass
+    if len(sys.argv) > 2 and sys.argv[2] == prep_str:
+        if not len(sys.argv) > 3:
+            exit("Need a kernel definition to prep kernel.") 
+        test_kernel_sources_name_converter()
     elif len(sys.argv) > 2 and sys.argv[2] == build_str:
         # TODO: Add build
         pass

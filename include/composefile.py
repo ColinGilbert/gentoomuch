@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os, sys, re
-from .gentoomuch_common import output_path, config_path, active_image_tag, stages_path, patches_workdir, patches_export_mountpoint, portage_output_path
+from .gentoomuch_common import output_path, config_path, active_image_tag, stages_path, patches_workdir, patches_export_mountpoint, portage_output_path, kernel_configs_path,  kconfigs_mountpoint
 from .write_file_lines import write_file_lines
 from .get_active_stage import get_active_stage
 from .tag_parser import tag_parser
@@ -32,7 +32,7 @@ def create_composefile(output_path : str, exporting_patch : str = ''):
     lines.append('    driver: local\n')
     lines.append('  binpkgs:\n')
     lines.append('    driver: local\n')
-    lines.append('  kernels:\n')
+    lines.append('  kernels_src:\n')
     lines.append('    driver: local\n')
     write_file_lines(os.path.join(output_path, 'docker-compose.yml'), lines)
     return True
@@ -61,13 +61,15 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     binpkg_str          = '    - binpkgs:/var/cache/binpkgs'
     distfiles_str       = '    - distfiles:/var/cache/distfiles'
     ebuilds_str         = '    - ebuilds:/var/db/repos/gentoo'
-    kernels_str         = '    - kernels:/mnt/kernels'
+    kernels_str         = '    - kernels_src:/usr/src'
     logs_mount_str      = '    - ./emerge.logs:/var/tmp/portage'
+    kconfigs_mount_str  = '    - '+ kernel_configs_path + ':' + kconfigs_mountpoint
     results.append(binpkg_str + '\n')
     results.append(distfiles_str + '\n')
     results.append(ebuilds_str + '\n')
     results.append(kernels_str + '\n')
     results.append(logs_mount_str + '\n')
+    results.append(kconfigs_mount_str + '\n')
     # These are parts that have different permissions between the two types of containers.
     #squashed_output_str = '    - ./squashed/blob:/mnt/squashed-portage'
     #squashed_mount_str  = '    - ./squashed/mountpoint:/mnt/squashed-portage'

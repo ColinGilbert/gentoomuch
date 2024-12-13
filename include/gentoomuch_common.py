@@ -24,7 +24,6 @@ patches_output_path             = os.path.join(portage_output_path, 'patches')
 # Includes (immutable data)
 includes_path			    	= './include'
 global_config_path		    	= os.path.join(includes_path, 'portage.global')
-dockerfiles_path		    	= os.path.join(includes_path, 'dockerfiles')
 # Config defines
 config_path				    	= './config'
 stage_defines_path		    	= os.path.join(config_path, 'stage.defines')
@@ -51,4 +50,5 @@ dockerized_username             = 'gentoomuch-user'
 usage_str                       = "    gentoomuch "
 # Patches
 patches_export_mountpoint       = os.path.join('/mnt', 'patches')
+kconfigs_mountpoint             = os.path.join('/mnt', 'kconfigs')
 patches_workdir                 = os.path.join(output_path, 'patches.work')
