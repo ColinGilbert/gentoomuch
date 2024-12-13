@@ -16,7 +16,7 @@ desired_profile_path	    	= os.path.join(output_path, 'desired_profile')
 desired_packages_path	    	= os.path.join(output_path, 'desired_packages')
 desired_hooks_path		    	= os.path.join(output_path, 'desired_hooks')
 profiles_path                   = os.path.join(output_path, 'profiles')
-desired_kernel_sources_path     = os.path.join(output_path, 'kernel-sources')
+kernels_out_path                = os.path.join(output_path, 'kernels')
 # Portage-related
 portage_output_path		    	= os.path.join(output_path, 'portage')
 sets_output_path		    	= os.path.join(portage_output_path, 'sets')
@@ -27,6 +27,7 @@ global_config_path		    	= os.path.join(includes_path, 'portage.global')
 # Config defines
 config_path				    	= '/vagrant/config'
 stage3_defines_path		    	= os.path.join(config_path, 'stage3.defines')
+stage4_defines_path		    	= os.path.join(config_path, 'stage4.defines')
 cpu_path				    	= os.path.join(config_path, 'cpu.defines')
 pkgset_path				    	= os.path.join(config_path, 'package.sets')
 local_config_basepath	        = os.path.join(config_path, 'portage.locals')
