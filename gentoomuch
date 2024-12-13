@@ -164,9 +164,9 @@ elif prime_cmd == bootstrap_str:
             exit("Could not sync")
         else:
             set_sync_happened()
-        valid, name = save_tarball(arch, profile, "gentoomuch/builder", True)
+        valid, archive_name = save_tarball(arch, profile, "gentoomuch/builder", True)
         if valid:
-            results = containerize(name, arch, profile, 'gentoomuch/builder', True)
+            results = containerize(archive_name, arch, profile, 'gentoomuch/builder', False)
             if results:
                 print("******************************************************************************************************************")
                 print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
@@ -174,9 +174,9 @@ elif prime_cmd == bootstrap_str:
                 print("***                                                LIKE A BOSS!                                                ***")
                 print("******************************************************************************************************************")
     else:
-        valid, name = save_tarball(arch, profile, "gentoomuch/builder", True)
+        valid, archive_name = save_tarball(arch, profile, "gentoomuch/builder", True)
         if valid:
-            results = containerize(name, arch, profile, 'gentoomuch/builder', True)
+            results = containerize(archive_name, arch, profile, 'gentoomuch/builder', False)
             if results:
                 print("******************************************************************************************************************")
                 print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
