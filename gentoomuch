@@ -225,6 +225,8 @@ elif prime_cmd == kernel_str:
         else:
             exit("You need to select a profile!")
     elif len(sys.argv) > 2 and sys.argv[2] == build_str:
+        if not len(sys.argv) > 3:
+            exit("Need a kernel definition to compile kernel.")
         handler = kernel_handler()
         valid, profile = get_desired_profile()
         if valid:
@@ -236,16 +238,21 @@ elif prime_cmd == kernel_str:
 ##################################
 # Deal with the freshroot command. 
 ##################################
-elif prime_cmd == freshroot_str: 
-    #swap_stage(arch, 'default', 'gentoomuch/builder')
-    freshroot()
+elif prime_cmd == freshroot_str:
+    valid, profile = get_desired_profile()
+    if valid: 
+        freshroot(arch, profile)
+    else:
+        exit("You need to set a profile!")
 #######################
 # Run pipelined builds.
 #######################
 elif prime_cmd == pipeline_str:
     print('Running pipeline')
-    # Get stage defines from buildlist and build them.
-    # TODO: Implement
+    # Get stage 3 defines and build them
+    # Get kernel defines and build them
+    # Get stage 4 defines and build them
+    # Cleanup keys from kernel build directory
 ####################
 # Sync Portage tree. 
 ####################
@@ -256,9 +263,9 @@ elif prime_cmd == sync_str:
             swap_stage(arch, profile, 'gentoomuch/builder', False)
             sync()
         else:
-            exit("Need to select a working profile prior to sync.")
+            exit("Need to select a profile prior to sync.")
     else:
-        exit("Need to bootstrap a stage3 prior to first sync")
+        exit("Need to bootstrap a profile prior to first sync")
 elif prime_cmd == clean_str:
     remove_old_docker_images()
 else:

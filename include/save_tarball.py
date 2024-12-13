@@ -8,17 +8,17 @@ from .get_dockerized_profile_name import get_dockerized_profile_name
 from .get_dockerized_stagedef_name import get_dockerized_stagedef_name
 from .get_docker_tag import get_docker_tag
 from .swap_stage import swap_stage
-from .get_local_tarball_name import get_local_tarball_name
+from .get_local_stage3_name import get_local_stage3_name
 from .containerize import containerize
 from .get_gentoomuch_uid import get_gentoomuch_uid
 from .get_gentoomuch_gid import get_gentoomuch_gid
 from .get_gentoomuch_jobs import get_gentoomuch_jobs
 from .package_from_patch import package_from_patch
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True):
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, adding_kernel: bool = False):
     # Important to swap our active stage first!
     swap_stage(arch, profile, stage_define, bool(upstream))
-    archive_name = get_local_tarball_name(arch, profile, stage_define)
+    archive_name = get_local_stage3_name(arch, profile, stage_define)
     for patch in patches:
         if patch != '':
             valid, package = package_from_patch(patch, False)

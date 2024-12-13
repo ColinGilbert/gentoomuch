@@ -1,6 +1,8 @@
 import os
-from .gentoomuch_common import kernel_configs_path, kernel_defines_path, kconfigs_mountpoint, output_path
+from .gentoomuch_common import kernel_configs_path, kernel_defines_path, kconfigs_mountpoint, output_path, tarball_path
 from .swap_stage import swap_stage
+from .get_local_stage3_name import get_local_stage3_name
+from .get_local_stage4_name import get_local_stage4_name
 
 
 class kernel_handler:
@@ -42,9 +44,9 @@ class kernel_handler:
     def get_package_name(self): # gentoo-sources-6.12.4-r1
         return self.name + '-sources-' + self.version + (('-r' + self.release) if self.release != '' else '')
 
-    def prep_kernel_config(self, arch: str, desired_profile: str, kernel_defines_name: str):
-        self._ingest_kernel_config(kernel_defines_name)
-        self.download_kernel(arch, desired_profile, kernel_defines_name)
+    def prep_kernel_config(self, arch: str, desired_profile: str, kernel_defines: str):
+        self._ingest_kernel_config(kernel_defines)
+        self.download_kernel(arch, desired_profile, kernel_defines)
         cmd_str = "cd /usr/src && "
         cmd_str += "ln -sf " + self.get_canonical_name() + " " + self.kernel_path + " && "
         cmd_str += "cd " + self.kernel_path + " && "
@@ -61,8 +63,8 @@ class kernel_handler:
         if code == 0:
             pass
 
-    def download_kernel(self, arch: str, profile: str, kernel_defines_name: str):
-        self._ingest_kernel_config(kernel_defines_name)
+    def download_kernel(self, arch: str, profile: str, kernel_defines: str):
+        self._ingest_kernel_config(kernel_defines)
         cmd_str = 'cd /usr/src && if [ ! -d ' + self.get_canonical_name() + ' ]; then '
         cmd_str += 'emerge --onlydeps =' + self.get_package_name() + ' && '
         cmd_str += 'emerge --oneshot --usepkg n =' + self.get_package_name()
@@ -74,8 +76,8 @@ class kernel_handler:
         if code == 0:
             pass        
 
-    def build_kernel(self, arch: str, profile: str, jobs: int, kernel_defines_name: str):
-        self._ingest_kernel_config(kernel_defines_name)
+    def build_kernel(self, arch: str, profile: str, jobs: int, kernel_defines: str):
+        self._ingest_kernel_config(kernel_defines)
         cmd_str = "cd /usr/src && "
         cmd_str += "ln -sf " + self.get_canonical_name() + " " + self.kernel_path + " && "
         kconf_exists = os.path.isfile(self.host_kconf_path)
@@ -89,13 +91,20 @@ class kernel_handler:
             if code == 0:
                 pass
         else:
-            exit("A valid kernel config file is required to build ka ernel")
+            exit("Could not find kernelconfig file: " + kernel_defines)
+
+    def build_stage4(self, arch: str, profile: str, stage_defines: str, kernel_defines: str):
+        self._ingest_kernel_config(kernel_defines)
+        stage3_tarball_path = os.path.join(tarball_path, get_local_stage3_name(arch, profile, stage_defines))
+        stage4_tarball_path = os.path.join(tarball_path, get_local_stage4_name(arch, profile, stage_defines, kernel_defines))
+
+
 
     def wipe_all_kernels(self):
         pass
 
-    def _ingest_kernel_config(self, kernel_defines_name: str):
-        self.specific_kernel_defines_path = os.path.join(kernel_defines_path, kernel_defines_name)
+    def _ingest_kernel_config(self, kernel_defines: str):
+        self.specific_kernel_defines_path = os.path.join(kernel_defines_path, kernel_defines)
         self.specific_kernel_defines_config_path = os.path.join(self.specific_kernel_defines_path, 'config')
         self.specific_kernel_defines_sources_path = os.path.join(self.specific_kernel_defines_path, 'sources')
         defines_exists = os.path.isdir(self.specific_kernel_defines_path) and os.path.isfile(self.specific_kernel_defines_config_path) and os.path.isfile(self.specific_kernel_defines_sources_path)

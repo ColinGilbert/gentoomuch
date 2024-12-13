@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, sys, re
+import os, sys
 from .gentoomuch_common import output_path, config_path, active_image_tag, stages_path, patches_workdir, patches_export_mountpoint, portage_output_path, kernel_configs_path,  kconfigs_mountpoint
 from .write_file_lines import write_file_lines
 from .get_active_stage import get_active_stage
@@ -12,7 +12,6 @@ updater_str = 'updater'
 patcher_str = 'patcher'
 
 containers = (builder_str, builder_privileged_str, updater_str, patcher_str)
-
 
 # This uses the current state of the work/portage directory and automatically creates a composefile that'll properly include each file. This avoids much handcruft.
 def create_composefile(output_path : str, exporting_patch : str = ''):
@@ -61,27 +60,25 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     binpkg_str          = '    - binpkgs:/var/cache/binpkgs'
     distfiles_str       = '    - distfiles:/var/cache/distfiles'
     ebuilds_str         = '    - ebuilds:/var/db/repos/gentoo'
-    kernels_str         = '    - kernels_src:/usr/src'
+    kernels_src_str         = '    - kernels_src:/usr/mnt/kernels'
     logs_mount_str      = '    - ./emerge.logs:/var/tmp/portage'
     kconfigs_mount_str  = '    - '+ kernel_configs_path + ':' + kconfigs_mountpoint
     results.append(binpkg_str + '\n')
     results.append(distfiles_str + '\n')
     results.append(ebuilds_str + '\n')
-    results.append(kernels_str + '\n')
+    results.append(kernels_src_str + '\n')
     results.append(logs_mount_str + '\n')
     results.append(kconfigs_mount_str + '\n')
     # These are parts that have different permissions between the two types of containers.
     #squashed_output_str = '    - ./squashed/blob:/mnt/squashed-portage'
     #squashed_mount_str  = '    - ./squashed/mountpoint:/mnt/squashed-portage'
     stages_mount_str    = '    - ./stages:/mnt/stages'    
-    # Here we actually write these differential parts into our list.
+    # Here we write differentiated stuff into our list.
     if is_builder or is_builder_privileged or is_patcher:
-        #results.append(squashed_mount_str + '\n')
         results.append(stages_mount_str + '\n')
         if exporting_patch != '':
             results.append('    - ' + os.path.join('./patches.work', exporting_patch) + ':' + patches_export_mountpoint + '\n')
     if is_updater:
-        #results.append(squashed_output_str + '\n')
         results.append(stages_mount_str + ':ro\n')
     # Here we loop over the all the files in the portage directory and add them.
     for (dirpath, directories, files) in os.walk(portage_output_path):
