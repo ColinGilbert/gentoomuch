@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, os, re
-from .gentoomuch_common import portage_output_path, config_path, stage_defines_path, cpu_path, pkgset_path, local_config_basepath, hooks_path, global_config_path, debug
+from .gentoomuch_common import portage_output_path, config_path, stage3_defines_path, cpu_path, pkgset_path, local_config_basepath, hooks_path, global_config_path, debug
 from .read_file_lines import read_file_lines
 from .read_by_token import read_by_token
 from .write_file_lines import write_file_lines

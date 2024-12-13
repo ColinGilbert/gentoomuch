@@ -25,8 +25,8 @@ patches_output_path             = os.path.join(portage_output_path, 'patches')
 includes_path			    	= './include'
 global_config_path		    	= os.path.join(includes_path, 'portage.global')
 # Config defines
-config_path				    	= './config'
-stage_defines_path		    	= os.path.join(config_path, 'stage.defines')
+config_path				    	= '/vagrant/config'
+stage3_defines_path		    	= os.path.join(config_path, 'stage3.defines')
 cpu_path				    	= os.path.join(config_path, 'cpu.defines')
 pkgset_path				    	= os.path.join(config_path, 'package.sets')
 local_config_basepath	        = os.path.join(config_path, 'portage.locals')

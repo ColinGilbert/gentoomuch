@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, os 
-from .gentoomuch_common import portage_output_path, config_path, stage_defines_path, cpu_path, pkgset_path, local_config_basepath, hooks_path, global_config_path, debug, sets_output_path
+from .gentoomuch_common import portage_output_path, config_path, stage3_defines_path, cpu_path, pkgset_path, local_config_basepath, hooks_path, global_config_path, debug, sets_output_path
 from .read_file_lines import read_file_lines
 from .write_file_lines import write_file_lines
 from .portage_directory import portage_directory
@@ -21,14 +21,14 @@ class portage_directory_combiner:
         # First, we ensure our target output directory is sane.
         self.__prep()
         # Determine whether the stage defines path exists.
-        current_stage_defines_path = os.path.join(stage_defines_path, current_stage)
-        if not os.path.isdir(current_stage_defines_path):
-            sys.exit(msg_prefix + 'Could not find stage definitions directory: ' + current_stage_defines_path)
+        current_stage3_defines_path = os.path.join(stage3_defines_path, current_stage)
+        if not os.path.isdir(current_stage3_defines_path):
+            sys.exit(msg_prefix + 'Could not find stage definitions directory: ' + current_stage3_defines_path)
         # Get CPU part of stage defines.
-        cpu_defines_path = os.path.join(current_stage_defines_path, 'cpu')
+        cpu_defines_path = os.path.join(current_stage3_defines_path, 'cpu')
         if not os.path.isfile(cpu_defines_path):
-            sys.exit(msg_prefix + 'Could not find cpu defines file: ' + os.path.join(current_stage_defines_path, 'cpu'))
-        cpu_conf = open(os.path.join(current_stage_defines_path, 'cpu')).read().strip()
+            sys.exit(msg_prefix + 'Could not find cpu defines file: ' + os.path.join(current_stage3_defines_path, 'cpu'))
+        cpu_conf = open(os.path.join(current_stage3_defines_path, 'cpu')).read().strip()
         # Now we verify CPU-related info.
         local_cpu_path = os.path.join(cpu_path, cpu_conf)
         if not os.path.isdir(local_cpu_path):
@@ -38,7 +38,7 @@ class portage_directory_combiner:
         # Now, we can pull in the globally-needed parts.
         self.__checkout_common_config()
         # We need to get to the file in which local portage directories are written. 
-        flags_defines_path = os.path.join(current_stage_defines_path, 'flags')
+        flags_defines_path = os.path.join(current_stage3_defines_path, 'flags')
         if os.path.isfile(flags_defines_path):
             flags_conf = read_file_lines(flags_defines_path)
         else:
@@ -53,10 +53,10 @@ class portage_directory_combiner:
             print(msg_prefix + "Ingesting " + combined_path)
             self.accum.ingest(combined_path)
         # We add info we must use post-munge.
-        combined_path = os.path.join(current_stage_defines_path, 'packages')
+        combined_path = os.path.join(current_stage3_defines_path, 'packages')
         if os.path.isfile(combined_path):
             self.todo['packages'] = read_file_lines(combined_path)
-        combined_path = os.path.join(current_stage_defines_path, 'hooks')
+        combined_path = os.path.join(current_stage3_defines_path, 'hooks')
         if os.path.isfile(combined_path):
             self.todo['hooks'] = read_file_lines(combined_path)
         # Now we write-out the files themselves

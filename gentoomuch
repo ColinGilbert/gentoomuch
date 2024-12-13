@@ -23,8 +23,7 @@ from include.patches import prep_patch, try_patch, save_patch
 from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
 from include.get_profiles import get_profiles
 from include.remove_old_docker_images import remove_old_docker_images
-from include.prep_kernel_config import prep_kernel_config
-from include.kernel_sources_name_converter import kernel_sources_name_converter, test_kernel_sources_name_converter
+from include.kernel_handler import kernel_handler
 
 # Our commandline keywords
 ls_str          = 'ls'
@@ -136,7 +135,7 @@ elif prime_cmd == profile_str:
         exit()
     elif sys.argv[2] == set_str and len(sys.argv) == 4: # Setting profile
         if not sys.argv[3].isnumeric():
-            set_desired_profile(arch, sys.argv[3])
+            set_desired_profile(arch, profile, get_gentoomuch_jobs(), sys.argv[3])
         else:
             print("You need to set a profile by name.")
         exit()
@@ -218,11 +217,20 @@ elif prime_cmd == patch_str:
 elif prime_cmd == kernel_str:
     if len(sys.argv) > 2 and sys.argv[2] == prep_str:
         if not len(sys.argv) > 3:
-            exit("Need a kernel definition to prep kernel.") 
-        test_kernel_sources_name_converter()
+            exit("Need a kernel definition to prep kernel.")
+        handler = kernel_handler()
+        valid, profile = get_desired_profile()
+        if valid:
+            handler.prep_kernel_config(arch, profile, sys.argv[3])
+        else:
+            exit("You need to select a profile!")
     elif len(sys.argv) > 2 and sys.argv[2] == build_str:
-        # TODO: Add build
-        pass
+        handler = kernel_handler()
+        valid, profile = get_desired_profile()
+        if valid:
+            handler.build_kernel(arch, profile, 8, sys.argv[3])
+        else:
+            exit("You need to select a profile!")
     else:
         print_usage_kernel()
 ##################################
