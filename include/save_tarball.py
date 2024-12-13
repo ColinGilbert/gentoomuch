@@ -24,7 +24,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
             valid, package = package_from_patch(patch, False)
             if not valid:
                 print("save_tarball: Invalid patch name " + patch)
-                return False 
+                return (False, '') 
     print("CREATING TARBALL: " + archive_name + " Using upstream image: " + str(upstream))
     if os.path.isfile(os.path.join(stages_path, archive_name)):
         os.remove(os.path.join(stages_path, archive_name))
@@ -95,17 +95,15 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     code = os.system(cmd_str)
     if not code == 0:
         exit("FAILED TO CREATE TARBALL: " + archive_name)
+    return (True, archive_name)
     print('CREATING CONTAINER FROM: ' + archive_name)
     # The following call to containerize() had me a little tripped-up until thought of it. Here is why:
     #    It would be a mistake to passthrough the arguments' "upstream" variable in this particular context.
     #       By definition, a stage that's being saved from a Docker container has already been ingested and turned into something local.
     #    This property holds even when the binaries inside that dockerized stage come from upstream.
-    results = containerize(os.path.join(stages_path, archive_name), arch, profile, stage_define, bool(False))
+
+    # results = containerize(os.path.join(stages_path, archive_name), arch, profile, stage_define, bool(False))
+
     # Thus ends the deceptively simple-looking method call....
-    if results and upstream:
-        print("******************************************************************************************************************")
-        print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
-        print("******************************************************************************************************************")
-        print("***                                                LIKE A BOSS!                                                ***")
-        print("******************************************************************************************************************")
-    return results
+
+    # return results

@@ -164,10 +164,25 @@ elif prime_cmd == bootstrap_str:
             exit("Could not sync")
         else:
             set_sync_happened()
-        save_tarball(arch, profile, "gentoomuch/builder", True)
+        valid, name = save_tarball(arch, profile, "gentoomuch/builder", True)
+        if valid:
+            results = containerize(name, arch, profile, 'gentoomuch/builder', True)
+            if results:
+                print("******************************************************************************************************************")
+                print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
+                print("******************************************************************************************************************")
+                print("***                                                LIKE A BOSS!                                                ***")
+                print("******************************************************************************************************************")
     else:
-        save_tarball(arch, profile, "gentoomuch/builder", True)
-    #remove_old_docker_images()
+        valid, name = save_tarball(arch, profile, "gentoomuch/builder", True)
+        if valid:
+            results = containerize(name, arch, profile, 'gentoomuch/builder', True)
+            if results:
+                print("******************************************************************************************************************")
+                print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
+                print("******************************************************************************************************************")
+                print("***                                                LIKE A BOSS!                                                ***")
+                print("******************************************************************************************************************")
     exit()
 ##################
 # Handle patching.
@@ -204,9 +219,11 @@ elif prime_cmd == patch_str:
                 patches.append(patch)
         profiles = get_profiles()
         for profile in profiles: 
-            results = save_tarball(arch, profile, "gentoomuch/builder", False, patches, False)
-            if results:
-               pass
+            valid, name = save_tarball(arch, profile, "gentoomuch/builder", False, patches, False)
+            if valid:
+               results = containerize(name, arch, profile, 'gentoomuch/builder', False)
+               if results:
+                pass
             #TODO: Add the rest in the pipeline
     else:
         print_usage_patch()

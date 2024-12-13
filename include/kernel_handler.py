@@ -1,5 +1,5 @@
 import os
-from .gentoomuch_common import kernel_configs_path, kernel_defines_path, kconfigs_mountpoint, output_path, tarball_path
+from .gentoomuch_common import kernel_configs_path, kernel_defines_path, kconfigs_mountpoint, output_path, stages_path
 from .swap_stage import swap_stage
 from .get_local_stage3_name import get_local_stage3_name
 from .get_local_stage4_name import get_local_stage4_name
@@ -95,8 +95,9 @@ class kernel_handler:
 
     def build_stage4(self, arch: str, profile: str, stage_defines: str, kernel_defines: str):
         self._ingest_kernel_config(kernel_defines)
-        stage3_tarball_path = os.path.join(tarball_path, get_local_stage3_name(arch, profile, stage_defines))
-        stage4_tarball_path = os.path.join(tarball_path, get_local_stage4_name(arch, profile, stage_defines, kernel_defines))
+        stage3_tarball_path = os.path.join(stages_path, get_local_stage3_name(arch, profile, stage_defines))
+        stage4_tarball_path = os.path.join(stages_path, get_local_stage4_name(arch, profile, stage_defines, kernel_defines))
+        
 
 
 
