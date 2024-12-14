@@ -143,9 +143,9 @@ class kernel_handler:
 
 def test_kernel_handler():
     test = kernel_handler()
-    canonical_name = 'linux-6.12.4-gentoo-zfs-r1'
-    package_name = 'gentoo-zfs-sources-6.12.4-r1'
-    module_path_name = '6.12.4-gentoo-zfs-r1'
+    canonical_name = 'linux-6.12.4-gentoo-r1'
+    package_name = 'gentoo-sources-6.12.4-r1'
+    module_path_name = '6.12.4-gentoo-r1'
     # test.from_canonical_name(canonical_name)
     # if canonical_name == test.get_canonical_name():
     #     print('SUCCESS - Canonical name')
