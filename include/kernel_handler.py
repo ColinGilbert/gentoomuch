@@ -10,39 +10,54 @@ class kernel_handler:
         self.name = ''
         self.version = ''
         self.release = ''
-        self.good = False
+        #self.good = False
 
-    def from_canonical_name(self, name: str):
-        elems = name.split('-')
-        if len(elems) < 3 or elems[0] != 'linux':
-            self.good = False
-            return
-        self.version = elems[1]
-        self.name = elems[2]
-        if len(elems) > 3:
-            if elems[3].startswith('r'):
-                tag = elems[3]
-                self.release = tag[1:]
-        self.good = True
+    # def from_canonical_name(self, name: str):
+    #     elems = name.split('-')
+    #     if len(elems) < 3 or elems[0] != 'linux':
+    #         self.good = False
+    #         return
+    #     self.version = elems[1]
+    #     self.name = elems[2]
+    #     if len(elems) > 3:
+    #         if elems[3].startswith('r'):
+    #             tag = elems[3]
+    #             self.release = tag[1:]
+    #     self.good = True
 
     def from_package_name(self, name: str):
         elems = name.split('-')
         if len(elems) < 3:
             self.good = False
             return
-        self.name = elems[0]
-        self.version = elems[2]
-        if len(elems) > 3:
-            if elems[3].startswith('r'):
-                tag = elems[3]
+        counter = len(elems) - 1
+        release_tag_found = False
+        while counter <= len(elems) and counter > -1:
+            if elems[counter].startswith('r') and counter == len(elems) - 1:
+                # print("TAG FOUND: " + elems[counter])
+                tag = elems[counter]
                 self.release = tag[1:]
-        self.good = True
+                release_tag_found = True
+            elif (counter == len(elems) - 2 and release_tag_found) or (counter == len(elems) - 1 and not release_tag_found):
+                # print("SOURCE FOUND: " + elems[counter])
+                self.version = elems[counter]
+            elif elems[counter] == 'sources':
+                # print("SKIPPING")
+                pass
+            else:
+                # print("FOUND NAME: " + elems[counter])
+                self.name = elems[counter] + '-' + self.name
+            counter = counter - 1
+        #self.good = True
 
     def get_canonical_name(self): # linux-6.12.4-gentoo-r1
-        return 'linux-' + self.version + '-' + self.name + (('-r' + self.release) if self.release != '' else '')
+        return 'linux-' + self.version + '-' + self.name + (('r' + self.release) if self.release != '' else '')
 
     def get_package_name(self): # gentoo-sources-6.12.4-r1
-        return self.name + '-sources-' + self.version + (('-r' + self.release) if self.release != '' else '')
+        return self.name + 'sources-' + self.version + (('-r' + self.release) if self.release != '' else '')
+
+    def get_module_path(self):
+        return "/lib/modules/kernel" + self.version + "-" + self.nme + "-" + (('-r' + self.release) if self.release != '' else '')
 
     def prep_kernel_config(self, arch: str, desired_profile: str, kernel_defines: str):
         self._ingest_kernel_config(kernel_defines)
@@ -128,23 +143,23 @@ class kernel_handler:
 
 def test_kernel_handler():
     test = kernel_handler()
-    canonical_name = 'linux-6.12.4-gentoo-r1'
-    package_name = 'gentoo-sources-6.12.4-r1'
-    test.from_canonical_name(canonical_name)
-    if canonical_name == test.get_canonical_name():
-        print('SUCCESS - Canonical name')
-    else:
-        print('FAILURE - Canonical name: ' + test.get_canonical_name())
-    if package_name == test.get_package_name():
-        print("SUCCESS - Package name")
-    else:
-        print('FAILURE - Package name')
+    canonical_name = 'linux-6.12.4-gentoo-zfs-r1'
+    package_name = 'gentoo-zfs-sources-6.12.4-r1'
+    # test.from_canonical_name(canonical_name)
+    # if canonical_name == test.get_canonical_name():
+    #     print('SUCCESS - Canonical name')
+    # else:
+    #     print('FAILURE - Canonical name: ' + test.get_canonical_name())
+    # if package_name == test.get_package_name():
+    #     print("SUCCESS - Package name")
+    # else:
+    #     print('FAILURE - Package name')
     test.from_package_name(package_name)
     if package_name == test.get_package_name():
         print('SUCCESS - Package name 2')
     else:
-        print('FAILURE - Package name 2')
+        print('FAILURE - Package name 2. Got: ' + test.get_package_name())
     if canonical_name == test.get_canonical_name():
         print('SUCCESS - Canonical name 2')
     else:
-        print('FAILURE - Canonical name 2')
+        print('FAILURE - Canonical name 2. Got: ' + test.get_canonical_name())

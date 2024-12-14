@@ -38,8 +38,8 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     if os.path.isfile(desired_packages_path):
         packages = read_file_lines(desired_packages_path)
     packages_str = ''
-    for l in packages:
-        packages_str += l.strip()
+    for p in packages:
+        packages_str += p.strip()
         packages_str += ' '
     uid = get_gentoomuch_uid()
     gid = get_gentoomuch_gid()

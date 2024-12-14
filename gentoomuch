@@ -23,7 +23,7 @@ from include.patches import prep_patch, try_patch, save_patch
 from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
 from include.get_profiles import get_profiles
 from include.remove_old_docker_images import remove_old_docker_images
-from include.kernel_handler import kernel_handler
+from include.kernel_handler import kernel_handler, test_kernel_handler
 from include.containerize import containerize
 
 # Our commandline keywords
@@ -49,9 +49,10 @@ clean_str       = 'clean'
 apply_str       = 'apply'
 kernel_str      = 'kernel'
 sources_str     = 'sources'
+test_str        = 'test'
 
 # First word after the "gentoomuch" command.
-primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str )
+primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str, test_str )
 # Commands you can use ls and set to visualize and manipulate.
 #ls_and_set_usedwiths = (profile_str, stage_str)
 # 
@@ -290,5 +291,10 @@ elif prime_cmd == sync_str:
         exit("Need to bootstrap a profile prior to first sync")
 elif prime_cmd == clean_str:
     remove_old_docker_images()
+    # code = os.system("rm -rf " + stages_path + "/*")
+    # if code == 0:
+    #     pass
+elif prime_cmd == "test":
+    test_kernel_handler()
 else:
     print_usage()
