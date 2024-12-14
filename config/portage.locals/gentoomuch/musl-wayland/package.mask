@@ -1,2 +1,0 @@
->=dev-libs/gobject-introspection-1.64.1
->=dev-libs/gobject-introspection-common-1.64.1

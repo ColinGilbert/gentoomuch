@@ -94,7 +94,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
             if hash_algorithm in hash_types:
                 module_path = os.path.split(module_paths_to_sign)[0]
                 module_filename = os.path.split(module_paths_to_sign)[1]
-                cmd_str += "cd " + module_path + " && "
+                cmd_str += "cd /lib/modules/" + handler.get_module_path_name() + "/kernel/" + module_path + " && "
                 cmd_str += "/usr/src/linux/scripts/sign-file " + hash_algorithm + " /usr/src/linux/certs/signing_key.pem /usr/src/linux/certs/signing_key.x509 " + module_filename + " && "
             else:
                 print("SAVE TARBALL FAILED: Invalid hash algorithm " + hash_algorithm)

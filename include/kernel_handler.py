@@ -56,8 +56,8 @@ class kernel_handler:
     def get_package_name(self): # gentoo-sources-6.12.4-r1
         return self.name + 'sources-' + self.version + (('-r' + self.release) if self.release != '' else '')
 
-    def get_module_path(self):
-        return "/lib/modules/kernel" + self.version + "-" + self.nme + "-" + (('-r' + self.release) if self.release != '' else '')
+    def get_module_path_name(self):
+        return self.version + "-" + self.name + (('r' + self.release) if self.release != '' else '')
 
     def prep_kernel_config(self, arch: str, desired_profile: str, kernel_defines: str):
         self._ingest_kernel_config(kernel_defines)
@@ -145,6 +145,7 @@ def test_kernel_handler():
     test = kernel_handler()
     canonical_name = 'linux-6.12.4-gentoo-zfs-r1'
     package_name = 'gentoo-zfs-sources-6.12.4-r1'
+    module_path_name = '6.12.4-gentoo-zfs-r1'
     # test.from_canonical_name(canonical_name)
     # if canonical_name == test.get_canonical_name():
     #     print('SUCCESS - Canonical name')
@@ -156,10 +157,14 @@ def test_kernel_handler():
     #     print('FAILURE - Package name')
     test.from_package_name(package_name)
     if package_name == test.get_package_name():
-        print('SUCCESS - Package name 2')
+        print('SUCCESS - Package name')
     else:
-        print('FAILURE - Package name 2. Got: ' + test.get_package_name())
+        print('FAILURE - Package name. Got: ' + test.get_package_name())
     if canonical_name == test.get_canonical_name():
-        print('SUCCESS - Canonical name 2')
+        print('SUCCESS - Canonical name')
     else:
-        print('FAILURE - Canonical name 2. Got: ' + test.get_canonical_name())
+        print('FAILURE - Canonical name. Got: ' + test.get_canonical_name())
+    if module_path_name == test.get_module_path_name():
+        print("SUCCESS - Module path name")
+    else:
+        print("FAILUTRE - Module path name. Got: " + test.get_module_path_name())
