@@ -60,7 +60,7 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     binpkg_str          = '    - binpkgs:/var/cache/binpkgs'
     distfiles_str       = '    - distfiles:/var/cache/distfiles'
     ebuilds_str         = '    - ebuilds:/var/db/repos/gentoo'
-    kernels_src_str         = '    - kernels_src:/usr/mnt/kernels'
+    kernels_src_str     = '    - kernels_src:/usr/src'
     logs_mount_str      = '    - ./emerge.logs:/var/tmp/portage'
     kconfigs_mount_str  = '    - '+ kernel_configs_path + ':' + kconfigs_mountpoint
     results.append(binpkg_str + '\n')

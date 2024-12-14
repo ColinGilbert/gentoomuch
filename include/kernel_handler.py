@@ -78,8 +78,9 @@ class kernel_handler:
 
     def build_kernel(self, arch: str, profile: str, jobs: int, kernel_defines: str):
         self._ingest_kernel_config(kernel_defines)
+        self.download_kernel(arch, profile, kernel_defines)
         cmd_str = "cd /usr/src && "
-        cmd_str += "ln -sf " + self.get_canonical_name() + " " + self.kernel_path + " && "
+        cmd_str += "ln -sf /usr/src/" + self.get_canonical_name() + " " + self.kernel_path + " && "
         kconf_exists = os.path.isfile(self.host_kconf_path)
         if kconf_exists:
             cmd_str += "cp " + self.mounted_kconf_path + " " + self.active_kconf_path + " && "
@@ -91,7 +92,7 @@ class kernel_handler:
             if code == 0:
                 pass
         else:
-            exit("Could not find kernelconfig file: " + kernel_defines)
+            exit("Could not find kernel defines: " + kernel_defines)
 
     def build_stage4(self, arch: str, profile: str, stage_defines: str, kernel_defines: str):
         self._ingest_kernel_config(kernel_defines)
@@ -99,9 +100,10 @@ class kernel_handler:
         stage4_tarball_path = os.path.join(stages_path, get_local_stage4_name(arch, profile, stage_defines, kernel_defines))
         
 
+    def remove_key_material_from_src_dirs(self):
+        pass
 
-
-    def wipe_all_kernels(self):
+    def wipe_all(self):
         pass
 
     def _ingest_kernel_config(self, kernel_defines: str):

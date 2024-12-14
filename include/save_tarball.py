@@ -9,16 +9,21 @@ from .get_dockerized_stagedef_name import get_dockerized_stagedef_name
 from .get_docker_tag import get_docker_tag
 from .swap_stage import swap_stage
 from .get_local_stage3_name import get_local_stage3_name
+from .get_local_stage4_name import get_local_stage4_name
 from .containerize import containerize
 from .get_gentoomuch_uid import get_gentoomuch_uid
 from .get_gentoomuch_gid import get_gentoomuch_gid
 from .get_gentoomuch_jobs import get_gentoomuch_jobs
 from .package_from_patch import package_from_patch
+from .kernel_handler import kernel_handler
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, adding_kernel: bool = False):
+
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kernel_defines: str = ''):
     # Important to swap our active stage first!
-    swap_stage(arch, profile, stage_define, bool(upstream))
-    archive_name = get_local_stage3_name(arch, profile, stage_define)
+    if kernel_defines == '':
+        archive_name = get_local_stage3_name(arch, profile, stage_define)
+    else:
+        archive_name = get_local_stage4_name(arch, profile, stage_define, kernel_defines)
     for patch in patches:
         if patch != '':
             valid, package = package_from_patch(patch, False)
@@ -58,6 +63,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "mkdir -p /mnt/gentoo/var/tmp/portage && "
     cmd_str += "mount --bind /var/tmp/portage /mnt/gentoo/var/tmp/portage && "
     cmd_str += "mount --bind /var/cache/binpkgs /mnt/gentoo/var/cache/binpkgs && "
+    cmd_str += "mount --bind /usr/src /mnt/gentoo/usr/src && "
     cmd_str += "mkdir -p /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "mount --bind /var/db/repos/gentoo /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "echo 'UTC' > ./etc/timezone && "
@@ -75,6 +81,12 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                 else:
                     cmd_str += "emerge -j" + jobs + " --oneshot --onlydeps =" + package + " && "
                     cmd_str += "emerge -j" + jobs + " --oneshot --usepkg n =" + package + " && "
+    if kernel_defines != '':
+        handler = kernel_handler()
+        handler.build_kernel(arch, profile, get_gentoomuch_jobs(), kernel_defines)
+        cmd_str += "cd /usr/src/linux && "
+        cmd_str += "make install && "
+        cmd_str += "make modules_install && "
     #cmd_str += "emerge --depclean --with-bdeps=n && " # Remove build deps
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot
@@ -88,22 +100,15 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "umount -fl /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "umount -fl /mnt/gentoo/var/cache/binpkgs && "
     cmd_str += "umount -fl /mnt/gentoo/var/tmp/portage && "
+    cmd_str += "umount -fl /mnt/gentoo/usr/src && "
     cmd_str += "cd /mnt/gentoo && "
+    cmd_str += "echo 'SAVING STAGE INTO TAR ARCHIVE' && "
     cmd_str += "tar -cf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls && "
     cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
     cmd_str += "\""
+    swap_stage(arch, profile, stage_define, upstream)
     code = os.system(cmd_str)
     if not code == 0:
-        exit("FAILED TO CREATE TARBALL: " + archive_name)
+        print("FAILED TO CREATE TARBALL: " + archive_name)
+        return (False,'')
     return (True, archive_name)
-    print('CREATING CONTAINER FROM: ' + archive_name)
-    # The following call to containerize() had me a little tripped-up until thought of it. Here is why:
-    #    It would be a mistake to passthrough the arguments' "upstream" variable in this particular context.
-    #       By definition, a stage that's being saved from a Docker container has already been ingested and turned into something local.
-    #    This property holds even when the binaries inside that dockerized stage come from upstream.
-
-    # results = containerize(os.path.join(stages_path, archive_name), arch, profile, stage_define, bool(False))
-
-    # Thus ends the deceptively simple-looking method call....
-
-    # return results

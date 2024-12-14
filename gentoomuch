@@ -60,7 +60,10 @@ primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_st
 # Print usage_str messages.
 def print_usage_stage():
     print(usage_str + stage_str + ' ' + ls_str)
-    print(usage_str + stage_str + ' ' + set_str + ' <name>')
+    print(usage_str + stage_str + ' ' + set_str + ' <stage.definition>')
+    print(usage_str + stage_str + ' ' + build_str + ' <profile.name> <stage.definition>')
+    print(usage_str + stage_str + ' ' + build_str + ' <profile.name> <stage.definition> <kernel.definition>')
+
 
 def print_usage_kernel():
     print(usage_str + kernel_str + ' ' + prep_str + ' <kernel.defines.name>')
@@ -68,16 +71,16 @@ def print_usage_kernel():
 
 def print_usage_profile():
     print(usage_str + profile_str + ' ' + ls_str)
-    print(usage_str + profile_str + ' ' + set_str + ' <name>')
+    print(usage_str + profile_str + ' ' + set_str + ' <profile.name>')
 
 def print_usage_bootstrap():
-    print(usage_str + bootstrap_str + ' <profile> <tarball>')
+    print(usage_str + bootstrap_str + ' <profile.name> <tarball.filename>')
 
 def print_usage_patch():
     patch_usage = usage_str + patch_str + ' '
-    print(patch_usage + prep_str + '  <name> <package> <version-str>')
-    print(patch_usage + try_str + ' <name>')
-    print(patch_usage + save_str + ' <name>')
+    print(patch_usage + prep_str + '  <patch.name> <package.name> <version-str>')
+    print(patch_usage + try_str + ' <patch.name>')
+    print(patch_usage + save_str + ' <patch.name>')
     print(patch_usage + apply_str)
 
 def print_no_profile():
@@ -123,6 +126,14 @@ if prime_cmd == stage_str:
         else:
             print("You need to set a stage by name, as numbers will change over time.")
         exit()
+    elif sys.argv[2] == build_str and len(sys.argv) == 5: # Building stage 3
+        valid, archive_name =  save_tarball(arch, sys.argv[3], sys.argv[4], False)
+        if valid:
+            print("SAVED STAGE3 " + archive_name)
+    elif sys.argv[2] == build_str and len(sys.argv) == 6: # Building stage 4
+        valid, archive_name = save_tarball(arch, sys.argv[3], sys.argv[4], False, [], False, sys.argv[5])
+        if valid:
+            print("SAVED STAGE4 " + archive_name)
     else: # Error message for stages
         print_usage_stage()
         exit()
