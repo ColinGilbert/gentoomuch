@@ -30,7 +30,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
             valid, package = package_from_patch(patch, False)
             if not valid:
                 print("SAVE TARBALL: Invalid patch name " + patch)
-                return (False, '') 
+                return (False, 'Invalid patch name') 
     print("CREATING TARBALL: " + archive_name + " Using upstream image: " + str(upstream))
     if os.path.isfile(os.path.join(stages_path, archive_name)):
         os.remove(os.path.join(stages_path, archive_name))
@@ -95,7 +95,10 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                 module_path = os.path.split(modules_to_sign)[0]
                 module_filename = os.path.split(mules_to_sign)[1]
                 cmd_str += "cd " + module_path + " && "
-                cmd_str += "/usr/src/linux/scripts/sign-file " + hash_algorithm + " /usr/src/linux/certs/signing_key.pem /usr/src/linux/certs/signing_key.x509 " + module_filename + " && " 
+                cmd_str += "/usr/src/linux/scripts/sign-file " + hash_algorithm + " /usr/src/linux/certs/signing_key.pem /usr/src/linux/certs/signing_key.x509 " + module_filename + " && "
+            else:
+                print("SAVE TARBALL FAILED: Invalid hash algorithm " + hash_algorithm)
+                return (False, 'Invalid hash algorithm') 
     #cmd_str += "emerge --depclean --with-bdeps=n && " # Remove build deps
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot
