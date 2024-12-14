@@ -8,3 +8,4 @@ sys-fs/squashfs-tools
 app-editors/vim
 app-portage/gentoolkit
 sys-kernel/linux-firmware
+app-arch/pigz

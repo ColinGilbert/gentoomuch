@@ -2,7 +2,7 @@
 
 import os, sys, re
 from typing import Tuple
-from include.gentoomuch_common import arch_config_path, config_path, output_path, usage_str, saved_patches_path
+from include.gentoomuch_common import arch_config_path, config_path, output_path, usage_str, saved_patches_path, stages_path
 from include.freshroot import freshroot
 from include.sync import sync, has_sync_happened, set_sync_happened
 from include.swap_stage import swap_stage
@@ -24,6 +24,7 @@ from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
 from include.get_profiles import get_profiles
 from include.remove_old_docker_images import remove_old_docker_images
 from include.kernel_handler import kernel_handler
+from include.containerize import containerize
 
 # Our commandline keywords
 ls_str          = 'ls'
@@ -48,6 +49,7 @@ clean_str       = 'clean'
 apply_str       = 'apply'
 kernel_str      = 'kernel'
 sources_str     = 'sources'
+
 # First word after the "gentoomuch" command.
 primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str )
 # Commands you can use ls and set to visualize and manipulate.
@@ -175,25 +177,17 @@ elif prime_cmd == bootstrap_str:
             exit("Could not sync")
         else:
             set_sync_happened()
-        valid, archive_name = save_tarball(arch, profile, "gentoomuch/builder", True)
-        if valid:
-            results = containerize(archive_name, arch, profile, 'gentoomuch/builder', False)
-            if results:
-                print("******************************************************************************************************************")
-                print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
-                print("******************************************************************************************************************")
-                print("***                                                LIKE A BOSS!                                                ***")
-                print("******************************************************************************************************************")
-    else:
-        valid, archive_name = save_tarball(arch, profile, "gentoomuch/builder", True)
-        if valid:
-            results = containerize(archive_name, arch, profile, 'gentoomuch/builder', False)
-            if results:
-                print("******************************************************************************************************************")
-                print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
-                print("******************************************************************************************************************")
-                print("***                                                LIKE A BOSS!                                                ***")
-                print("******************************************************************************************************************")
+    valid, archive_name = save_tarball(arch, profile, "gentoomuch/builder", True)
+    if valid:
+        results = containerize(os.path.join(stages_path, archive_name), arch, profile, 'gentoomuch/builder', False)
+        if results:
+            print("******************************************************************************************************************")
+            print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
+            print("******************************************************************************************************************")
+            print("***                                                LIKE A BOSS!                                                ***")
+            print("******************************************************************************************************************")
+        else:
+            exit("GENTOOMUCH: Failed to containerize bootstrapped stage")
     exit()
 ##################
 # Handle patching.
@@ -232,9 +226,9 @@ elif prime_cmd == patch_str:
         for profile in profiles: 
             valid, name = save_tarball(arch, profile, "gentoomuch/builder", False, patches, False)
             if valid:
-               results = containerize(name, arch, profile, 'gentoomuch/builder', False)
-               if results:
-                pass
+               results = containerize(path.join(stage_path, name), arch, profile, 'gentoomuch/builder', False)
+               if not results:
+                exit("GENTOOMUCH: Failed to containerize patched stage")
             #TODO: Add the rest in the pipeline
     else:
         print_usage_patch()

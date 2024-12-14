@@ -70,8 +70,6 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     results.append(logs_mount_str + '\n')
     results.append(kconfigs_mount_str + '\n')
     # These are parts that have different permissions between the two types of containers.
-    #squashed_output_str = '    - ./squashed/blob:/mnt/squashed-portage'
-    #squashed_mount_str  = '    - ./squashed/mountpoint:/mnt/squashed-portage'
     stages_mount_str    = '    - ./stages:/mnt/stages'    
     # Here we write differentiated stuff into our list.
     if is_builder or is_builder_privileged or is_patcher:

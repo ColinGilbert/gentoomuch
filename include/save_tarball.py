@@ -17,8 +17,9 @@ from .get_gentoomuch_jobs import get_gentoomuch_jobs
 from .package_from_patch import package_from_patch
 from .kernel_handler import kernel_handler
 
+hash_types = {'sha1', 'sha224', 'sha256', 'sh384', 'sha512'}
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kernel_defines: str = ''):
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kernel_defines: str = '', modules_to_sign: [str] = [], hash_algorithm: str = '' ):
     # Important to swap our active stage first!
     if kernel_defines == '':
         archive_name = get_local_stage3_name(arch, profile, stage_define)
@@ -81,12 +82,20 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                 else:
                     cmd_str += "emerge -j" + jobs + " --oneshot --onlydeps =" + package + " && "
                     cmd_str += "emerge -j" + jobs + " --oneshot --usepkg n =" + package + " && "
+    cmd_str += "emerge --onlydeps sys-kernel/gentoo-sources && "
     if kernel_defines != '':
         handler = kernel_handler()
         handler.build_kernel(arch, profile, get_gentoomuch_jobs(), kernel_defines)
         cmd_str += "cd /usr/src/linux && "
         cmd_str += "make install && "
         cmd_str += "make modules_install && "
+        # TODO: Add manual signing for kernel modules
+        if len(modules_to_sign) > 0:
+            if hash_algorithm in hash_types:
+                module_path = os.path.split(modules_to_sign)[0]
+                module_filename = os.path.split(mules_to_sign)[1]
+                cmd_str += "cd " + module_path + " && "
+                cmd_str += "/usr/src/linux/scripts/sign-file " + hash_algorithm + " /usr/src/linux/certs/signing_key.pem /usr/src/linux/certs/signing_key.x509 " + module_filename + " && " 
     #cmd_str += "emerge --depclean --with-bdeps=n && " # Remove build deps
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot

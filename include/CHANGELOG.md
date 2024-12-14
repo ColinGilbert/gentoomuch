@@ -1,1 +1,0 @@
-May 16, 2021: Started keeping a changelog. Prior work included converting most of the original scripts into object-oriented code and writing down plans to guide the rest of the project. Refactored ``pull-upstream-stage3`` and made it far more readable. Added issues to the Github tracker.
