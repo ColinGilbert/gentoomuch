@@ -28,7 +28,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         if patch != '':
             valid, package = package_from_patch(patch, False)
             if not valid:
-                print("save_tarball: Invalid patch name " + patch)
+                print("SAVE TARBALL: Invalid patch name " + patch)
                 return (False, '') 
     print("CREATING TARBALL: " + archive_name + " Using upstream image: " + str(upstream))
     if os.path.isfile(os.path.join(stages_path, archive_name)):

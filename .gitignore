@@ -12,3 +12,4 @@ gentoomuch-data/
 !config/
 .vagrant
 stage3-*
+stage4-*
