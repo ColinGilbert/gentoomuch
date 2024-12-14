@@ -134,7 +134,9 @@ if prime_cmd == stage_str:
         if valid:
             print("SAVED STAGE3 " + archive_name)
     elif sys.argv[2] == build_str and len(sys.argv) == 6: # Building stage 4
-        valid, archive_name = save_tarball(arch, sys.argv[3], sys.argv[4], False, [], False, sys.argv[5])
+        #save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kernel_defines: str = '', module_paths_to_sign: [str] = [], hash_algorithm: str = 'sha512'): 
+        modules = []
+        valid, archive_name = save_tarball(arch, profile = sys.argv[3], stage_define = sys.argv[4], upstream = False, patches = [], patches_have_been_compiled = False, kernel_defines = sys.argv[5], modules_to_sign = modules, hash_algorithm = 'sha512')
         if valid:
             print("SAVED STAGE4 " + archive_name)
     else: # Error message for stages

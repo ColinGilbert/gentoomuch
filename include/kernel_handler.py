@@ -26,13 +26,16 @@ class kernel_handler:
     #     self.good = True
 
     def from_package_name(self, name: str):
+        self.name = ''
+        self.version = ''
+        self.release = ''
         elems = name.split('-')
         if len(elems) < 3:
             self.good = False
             return
         counter = len(elems) - 1
         release_tag_found = False
-        while counter <= len(elems) and counter > -1:
+        while counter > -1:
             if elems[counter].startswith('r') and counter == len(elems) - 1:
                 # print("TAG FOUND: " + elems[counter])
                 tag = elems[counter]
@@ -80,7 +83,9 @@ class kernel_handler:
 
     def download_kernel(self, arch: str, profile: str, kernel_defines: str):
         self._ingest_kernel_config(kernel_defines)
+        #print("DOWNLOADING KERNEL BEGIN FOR " + self.get_package_name())
         cmd_str = 'cd /usr/src && if [ ! -d ' + self.get_canonical_name() + ' ]; then '
+        #cmd_str += 'echo "DOWNLOADING" && '
         cmd_str += 'emerge --onlydeps =' + self.get_package_name() + ' && '
         cmd_str += 'emerge --oneshot --usepkg n =' + self.get_package_name()
         cmd_str += '; else '
@@ -92,6 +97,7 @@ class kernel_handler:
             pass        
 
     def build_kernel(self, arch: str, profile: str, jobs: int, kernel_defines: str):
+        print("BUILDING KERNEL")
         self._ingest_kernel_config(kernel_defines)
         self.download_kernel(arch, profile, kernel_defines)
         cmd_str = "cd /usr/src && "
@@ -107,7 +113,7 @@ class kernel_handler:
             if code == 0:
                 pass
         else:
-            exit("Could not find kernel defines: " + kernel_defines)
+            exit("Could not find kernel config at " + self.host_kconf_path)
 
     def build_stage4(self, arch: str, profile: str, stage_defines: str, kernel_defines: str):
         self._ingest_kernel_config(kernel_defines)
