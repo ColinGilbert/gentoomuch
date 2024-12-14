@@ -100,7 +100,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                 print("SAVE TARBALL FAILED: Invalid hash algorithm " + hash_algorithm)
                 return (False, '') 
     #cmd_str += "emerge --depclean --with-bdeps=n && " # Remove build deps
-    cdm_str += "cd / && "
+    cmd_str += "cd / && "
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot
     #cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
