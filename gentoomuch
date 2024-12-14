@@ -226,7 +226,7 @@ elif prime_cmd == patch_str:
         for profile in profiles: 
             valid, name = save_tarball(arch, profile, "gentoomuch/builder", False, patches, False)
             if valid:
-               results = containerize(os.path.join(stage_path, name), arch, profile, 'gentoomuch/builder', False)
+               results = containerize(os.path.join(stages_path, name), arch, profile, 'gentoomuch/builder', False)
                if not results:
                 exit("GENTOOMUCH: Failed to containerize patched stage")
             #TODO: Add the rest in the pipeline
