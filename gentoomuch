@@ -175,6 +175,7 @@ elif prime_cmd == bootstrap_str:
         exit("Failed to load tarball")
     if not has_sync_happened():
         print("Syncing for first time!")
+        swap_stage(arch, profile, 'gentoomuch/builder', True)
         code = sync()
         if code != 0:
             exit("Could not sync")

@@ -31,7 +31,7 @@ def create_composefile(output_path : str, exporting_patch : str = ''):
     lines.append('    driver: local\n')
     lines.append('  binpkgs:\n')
     lines.append('    driver: local\n')
-    lines.append('  kernels_src:\n')
+    lines.append('  kernels_ccache:\n')
     lines.append('    driver: local\n')
     write_file_lines(os.path.join(output_path, 'docker-compose.yml'), lines)
     return True
@@ -60,14 +60,14 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     binpkg_str          = '    - binpkgs:/var/cache/binpkgs'
     distfiles_str       = '    - distfiles:/var/cache/distfiles'
     ebuilds_str         = '    - ebuilds:/var/db/repos/gentoo'
-    kernels_src_str     = '    - kernels_src:/usr/src'
     logs_mount_str      = '    - ./emerge.logs:/var/tmp/portage'
+    kernel_ccache_str   = '    - kernels_ccache:/mnt/kernel-ccache'
     kconfigs_mount_str  = '    - '+ kernel_configs_path + ':' + kconfigs_mountpoint
     results.append(binpkg_str + '\n')
     results.append(distfiles_str + '\n')
     results.append(ebuilds_str + '\n')
-    results.append(kernels_src_str + '\n')
     results.append(logs_mount_str + '\n')
+    results.append(kernel_ccache_str+ '\n')
     results.append(kconfigs_mount_str + '\n')
     # These are parts that have different permissions between the two types of containers.
     stages_mount_str    = '    - ./stages:/mnt/stages'    

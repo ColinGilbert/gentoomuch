@@ -17,7 +17,7 @@ def bootstrap_dockerfile(tarball_name: str, profile: str) -> str:
     results += '&& mkdir /mnt/user-data \\\n'
     results += '&& mkdir /mnt/data-out \\\n'
     results += '&& mkdir /mnt/gentoo \\\n'
-    results += '&& mkdir /mnt/portage.imported \\\n'
+    results += '&& mkdir /mnt/kernel-ccache \\\n'
     results += '&& mkdir ' + kconfigs_mountpoint + '\\\n'
     results += '&& rm -rf /etc/portage/package.use \\\n'
     results += '&& groupadd -g 1000 ' + dockerized_username + '\\\n'
