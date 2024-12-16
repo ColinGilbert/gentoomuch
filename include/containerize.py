@@ -12,11 +12,11 @@ from .get_profiles import get_profiles
 from .save_profiles import save_profiles
 
 # This turns a tarball into a dockerized stage
-def containerize(stages_path : str, arch : str, profile : str, stagedef : str, upstream : bool) -> bool:
+def containerize(stages_path : str, arch : str, profile : str, stage_define : str, upstream : bool) -> bool:
     # This tag is used to name an image that is imported as a bootstrap image.
     bootstrap_tag = image_tag_base + "bootstrap:latest"
-    desired_tag = get_docker_tag(arch, profile, stagedef, upstream)
-    temp_tag = get_docker_tag(arch, profile, stagedef, upstream, True)
+    desired_tag = get_docker_tag(arch, profile, stage_define, upstream)
+    temp_tag = get_docker_tag(arch, profile, stage_define, upstream, True)
     #print("Containerize... desired tag = " + desired_tag)
     # Which directory do we use to build?
     # If it exists, we're doing an update and thus we remove.
@@ -43,7 +43,7 @@ def containerize(stages_path : str, arch : str, profile : str, stagedef : str, u
         print("Could not import tarball " + tarball_name)
         return False
     # TODO: Replace with renaming and allow recovery from backup.
-    if docker_stage_exists(arch, profile, stagedef, upstream):
+    if docker_stage_exists(arch, profile, stage_define, upstream):
         code = os.system("docker rmi " + desired_tag)
         if code == 0:
             pass

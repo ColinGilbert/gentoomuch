@@ -15,16 +15,15 @@ from .get_gentoomuch_uid import get_gentoomuch_uid
 from .get_gentoomuch_gid import get_gentoomuch_gid
 from .get_gentoomuch_jobs import get_gentoomuch_jobs
 from .package_from_patch import package_from_patch
-from .kernel_handler import kernel_handler
 
 hash_types = {'sha1', 'sha224', 'sha256', 'sh384', 'sha512'}
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kernel_defines: str = '', modules_to_sign: [str] = [], hash_algorithm: str = 'sha512'):
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', emerge_kernel: bool = False):
     # Important to swap our active stage first!
-    if kernel_defines == '':
+    if kconfig == '':
         archive_name = get_local_stage3_name(arch, profile, stage_define)
     else:
-        archive_name = get_local_stage4_name(arch, profile, stage_define, kernel_defines)
+        archive_name = get_local_stage4_name(arch, profile, stage_define, kconfig)
     for patch in patches:
         if patch != '':
             valid, package = package_from_patch(patch, False)
@@ -65,6 +64,8 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "mount --bind /var/tmp/portage /mnt/gentoo/var/tmp/portage && "
     cmd_str += "mount --bind /var/cache/binpkgs /mnt/gentoo/var/cache/binpkgs && "
     cmd_str += "mount --bind /usr/src /mnt/gentoo/usr/src && "
+    cmd_str += "mkdir /mnt/gentoo/mnt/ccache && "
+    cmd_str += "mount --bind /mnt/ccache /mnt/gentoo/mnt/ccache && "
     cmd_str += "mkdir -p /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "mount --bind /var/db/repos/gentoo /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "echo 'UTC' > ./etc/timezone && "
@@ -83,18 +84,30 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                     cmd_str += "emerge -j" + jobs + " --oneshot --onlydeps =" + package + " && "
                     cmd_str += "emerge -j" + jobs + " --oneshot --usepkg n =" + package + " && "
     cmd_str += "emerge --onlydeps sys-kernel/gentoo-sources && "
-    if kernel_defines != '':
-        handler = kernel_handler()
-        handler.build_kernel(arch, profile, get_gentoomuch_jobs(), kernel_defines)
+    if emerge_kernel:
+        cmd_str += 'rm -rf /usr/src/* && '
+        cmd_str += 'emerge sys-kernel/gentoo-sources && '
+    if kconfig != '':
+        success = copy_kconf_to_staging(kconf)        #handler = kernel_handler()
+        if not success:
+            print("SAVE TARBALL: Could not copy kernel config")
+            return (False, '')
+        #handler.build_kernel(arch, profile, get_gentoomuch_jobs(), kconfig)
         cmd_str += "cd /usr/src/linux && "
+        cmd_str += "rm /usr/src/linux/certs/signing-key.pem & "
+        cmd_str += "KBUILD_BUILD_TIMESTAMP='' make CC=\"ccache gcc\" -j" + jobs + " && "
+        #cmd_str += "make -j" + jobs + " && "
         cmd_str += "make install && "
-        cmd_str += "make modules_install && "
-        # TODO: Add manual signing for kernel modules
+        cmd_str += "make modules_install & "
+        cmd_str += 'emerge --onlydeps @modules_rebuild && '
+        cmd_str += 'emerge --usepkg n @modules_rebuild && '
+        cmd_str += "rm /usr/src/linux/certs/signing-key.pem & "
+        # Manual signing for kernel modules
         if len(modules_to_sign) > 0:
             if hash_algorithm in hash_types:
                 module_path = os.path.split(modules_to_sign)[0]
                 module_filename = os.path.split(modules_to_sign)[1]
-                cmd_str += "cd /lib/modules/" + handler.get_module_path_name() + "/kernel/" + module_path + " && "
+                cmd_str += "cd /lib/modules/linux-*/kernel/" + module_path + " && "
                 cmd_str += "/usr/src/linux/scripts/sign-file " + hash_algorithm + " /usr/src/linux/certs/signing_key.pem /usr/src/linux/certs/signing_key.x509 " + module_filename + " && "
             else:
                 print("SAVE TARBALL FAILED: Invalid hash algorithm " + hash_algorithm)
@@ -113,6 +126,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "umount -fl /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "umount -fl /mnt/gentoo/var/cache/binpkgs && "
     cmd_str += "umount -fl /mnt/gentoo/var/tmp/portage && "
+    cmd_str += "umount -fl /mnt/gentoo/mnt/ccache && "
     cmd_str += "umount -fl /mnt/gentoo/usr/src && "
     cmd_str += "cd /mnt/gentoo && "
     cmd_str += "echo 'SAVING STAGE INTO TAR ARCHIVE' && "

@@ -9,3 +9,4 @@ app-editors/vim
 app-portage/gentoolkit
 sys-kernel/linux-firmware
 app-arch/pigz
+sys-kernel/gentoo-sources

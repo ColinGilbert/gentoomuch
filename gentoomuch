@@ -23,7 +23,7 @@ from include.patches import prep_patch, try_patch, save_patch
 from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
 from include.get_profiles import get_profiles
 from include.remove_old_docker_images import remove_old_docker_images
-from include.kernel_handler import kernel_handler, test_kernel_handler
+from include.prep_kernel_config import prep_kernel_config
 from include.containerize import containerize
 
 # Our commandline keywords
@@ -65,12 +65,12 @@ def print_usage_stage():
     print(usage_str + stage_str + ' ' + ls_str)
     print(usage_str + stage_str + ' ' + set_str + ' <stage.definition>')
     print(usage_str + stage_str + ' ' + build_str + ' <profile.name> <stage.definition>')
-    print(usage_str + stage_str + ' ' + build_str + ' <profile.name> <stage.definition> <kernel.definition>')
+    print(usage_str + stage_str + ' ' + build_str + ' <profile.name> <stage.definition> <kernel.config>')
 
 
 def print_usage_kernel():
-    print(usage_str + kernel_str + ' ' + prep_str + ' <kernel.defines.name>')
-    print(usage_str + kernel_str + ' ' + build_str + ' <kernel.defines.name>')
+    print(usage_str + kernel_str + ' ' + prep_str + ' <kernel.config>')
+    # print(usage_str + kernel_str + ' ' + build_str + ' <kernel.config>')
 
 def print_usage_profile():
     print(usage_str + profile_str + ' ' + ls_str)
@@ -130,13 +130,13 @@ if prime_cmd == stage_str:
             print("You need to set a stage by name, as numbers will change over time.")
         exit()
     elif sys.argv[2] == build_str and len(sys.argv) == 5: # Building stage 3
-        valid, archive_name =  save_tarball(arch, sys.argv[3], sys.argv[4], False)
+        valid, archive_name =  save_tarball(arch, profile = sys.argv[3], stage_define = sys.argv[4], upstream = False)
         if valid:
             print("SAVED STAGE3 " + archive_name)
     elif sys.argv[2] == build_str and len(sys.argv) == 6: # Building stage 4
         #save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kernel_defines: str = '', module_paths_to_sign: [str] = [], hash_algorithm: str = 'sha512'): 
         modules = []
-        valid, archive_name = save_tarball(arch, profile = sys.argv[3], stage_define = sys.argv[4], upstream = False, patches = [], patches_have_been_compiled = False, kernel_defines = sys.argv[5], modules_to_sign = modules, hash_algorithm = 'sha512')
+        valid, archive_name = save_tarball(arch, profile = sys.argv[3], stage_define = sys.argv[4], upstream = False, kconf = sys.argv[5])
         if valid:
             print("SAVED STAGE4 " + archive_name)
     else: # Error message for stages
@@ -151,7 +151,7 @@ elif prime_cmd == profile_str:
         exit()
     elif sys.argv[2] == set_str and len(sys.argv) == 4: # Setting profile
         if not sys.argv[3].isnumeric():
-            set_desired_profile(arch, profile, get_gentoomuch_jobs(), sys.argv[3])
+            set_desired_profile(arch, sys.argv[3])
         else:
             print("You need to set a profile by name.")
         exit()
@@ -181,9 +181,9 @@ elif prime_cmd == bootstrap_str:
             exit("Could not sync")
         else:
             set_sync_happened()
-    valid, archive_name = save_tarball(arch, profile, "gentoomuch/builder", True)
+    valid, archive_name = save_tarball(arch, profile, stage_define = "gentoomuch/builder", upstream = True)
     if valid:
-        results = containerize(os.path.join(stages_path, archive_name), arch, profile, 'gentoomuch/builder', False)
+        results = containerize(os.path.join(stages_path, archive_name), arch, profile, stage_define = 'gentoomuch/builder', upstream = False)
         if results:
             print("******************************************************************************************************************")
             print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
@@ -228,9 +228,9 @@ elif prime_cmd == patch_str:
                 patches.append(patch)
         profiles = get_profiles()
         for profile in profiles: 
-            valid, name = save_tarball(arch, profile, "gentoomuch/builder", False, patches, False)
+            valid, name = save_tarball(arch, profile, "gentoomuch/builder", upstream =  False, patches = patches, patches_have_been_compiled = False)
             if valid:
-               results = containerize(os.path.join(stages_path, name), arch, profile, 'gentoomuch/builder', False)
+               results = containerize(os.path.join(stages_path, name), arch, profile, stage_define = 'gentoomuch/builder', upstream = False)
                if not results:
                 exit("GENTOOMUCH: Failed to containerize patched stage")
             #TODO: Add the rest in the pipeline
@@ -244,19 +244,9 @@ elif prime_cmd == kernel_str:
     if len(sys.argv) > 2 and sys.argv[2] == prep_str:
         if not len(sys.argv) > 3:
             exit("Need a kernel definition to prep kernel.")
-        handler = kernel_handler()
         valid, profile = get_desired_profile()
         if valid:
-            handler.prep_kernel_config(arch, profile, sys.argv[3])
-        else:
-            exit("You need to select a profile!")
-    elif len(sys.argv) > 2 and sys.argv[2] == build_str:
-        if not len(sys.argv) > 3:
-            exit("Need a kernel definition to compile kernel.")
-        handler = kernel_handler()
-        valid, profile = get_desired_profile()
-        if valid:
-            handler.build_kernel(arch, profile, 8, sys.argv[3])
+            prep_kernel_config(arch, profile, sys.argv[3])
         else:
             exit("You need to select a profile!")
     else:
@@ -276,9 +266,7 @@ elif prime_cmd == freshroot_str:
 elif prime_cmd == pipeline_str:
     print('Running pipeline')
     # Get stage 3 defines and build them
-    # Get kernel defines and build them
     # Get stage 4 defines and build them
-    # Cleanup keys from kernel build directory
 ####################
 # Sync Portage tree. 
 ####################
@@ -294,10 +282,11 @@ elif prime_cmd == sync_str:
         exit("Need to bootstrap a profile prior to first sync")
 elif prime_cmd == clean_str:
     remove_old_docker_images()
-    # code = os.system("rm -rf " + stages_path + "/*")
-    # if code == 0:
-    #     pass
-elif prime_cmd == "test":
-    test_kernel_handler()
+    code = os.system("rm -rf " + stages_path + "/*")
+    if code == 0:
+        pass
+    code = os.system("docker system prune -f")
+    if code == 0:
+        pass
 else:
     print_usage()

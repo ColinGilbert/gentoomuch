@@ -31,7 +31,9 @@ def create_composefile(output_path : str, exporting_patch : str = ''):
     lines.append('    driver: local\n')
     lines.append('  binpkgs:\n')
     lines.append('    driver: local\n')
-    lines.append('  kernels_ccache:\n')
+    lines.append('  ccache:\n')
+    lines.append('    driver: local\n')
+    lines.append('  kernel_src:\n')
     lines.append('    driver: local\n')
     write_file_lines(os.path.join(output_path, 'docker-compose.yml'), lines)
     return True
@@ -57,18 +59,13 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     results.append('    - /dev:/dev\n')
     results.append('    - /proc:/proc\n')
     results.append('    - /sys:/sys:ro\n')
-    binpkg_str          = '    - binpkgs:/var/cache/binpkgs'
-    distfiles_str       = '    - distfiles:/var/cache/distfiles'
-    ebuilds_str         = '    - ebuilds:/var/db/repos/gentoo'
-    logs_mount_str      = '    - ./emerge.logs:/var/tmp/portage'
-    kernel_ccache_str   = '    - kernels_ccache:/mnt/kernel-ccache'
-    kconfigs_mount_str  = '    - '+ kernel_configs_path + ':' + kconfigs_mountpoint
-    results.append(binpkg_str + '\n')
-    results.append(distfiles_str + '\n')
-    results.append(ebuilds_str + '\n')
-    results.append(logs_mount_str + '\n')
-    results.append(kernel_ccache_str+ '\n')
-    results.append(kconfigs_mount_str + '\n')
+    results.append('    - binpkgs:/var/cache/binpkgs\n')
+    results.append('    - distfiles:/var/cache/distfiles\n')
+    results.append('    - ebuilds:/var/db/repos/gentoo\n')
+    results.append('    - ./emerge.logs:/var/tmp/portage\n')
+    results.append('    - ccache:/mnt/ccache\n')
+    results.append('    - kernel_src:/usr/src\n')
+    results.append('    - '+ kernel_configs_path + ':' + kconfigs_mountpoint + '\n')
     # These are parts that have different permissions between the two types of containers.
     stages_mount_str    = '    - ./stages:/mnt/stages'    
     # Here we write differentiated stuff into our list.

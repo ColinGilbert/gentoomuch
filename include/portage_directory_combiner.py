@@ -42,7 +42,7 @@ class portage_directory_combiner:
         if os.path.isfile(flags_defines_path):
             flags_conf = read_file_lines(flags_defines_path)
         else:
-            sys.exit(msg_prefix + 'Stage3 definition flag file: ' + flags_defines_path + ' does not exist.')
+            sys.exit(msg_prefix + 'Stage3 flag definition file: ' + flags_defines_path + ' does not exist.')
         # Now we can loop over all local portages, accumulating them.
         for local in flags_conf:
             combined_path = os.path.join(local_config_basepath, local.strip())
