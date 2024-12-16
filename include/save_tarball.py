@@ -64,8 +64,8 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "mount --bind /var/tmp/portage /mnt/gentoo/var/tmp/portage && "
     cmd_str += "mount --bind /var/cache/binpkgs /mnt/gentoo/var/cache/binpkgs && "
     cmd_str += "mount --bind /usr/src /mnt/gentoo/usr/src && "
-    cmd_str += "mkdir /mnt/gentoo/mnt/ccache && "
-    cmd_str += "mount --bind /mnt/ccache /mnt/gentoo/mnt/ccache && "
+    cmd_str += "mkdir /mnt/gentoo/mnt/ccache_portage && "
+    cmd_str += "mount --bind /mnt/ccache_portage /mnt/gentoo/mnt/ccache_portage && "
     cmd_str += "mkdir -p /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "mount --bind /var/db/repos/gentoo /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "echo 'UTC' > ./etc/timezone && "
@@ -83,7 +83,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                 else:
                     cmd_str += "emerge -j" + jobs + " --oneshot --onlydeps =" + package + " && "
                     cmd_str += "emerge -j" + jobs + " --oneshot --usepkg n =" + package + " && "
-    cmd_str += "emerge --onlydeps sys-kernel/gentoo-sources && "
+    # cmd_str += "emerge --onlydeps sys-kernel/gentoo-sources && "
     if emerge_kernel:
         cmd_str += 'rm -rf /usr/src/* && '
         cmd_str += 'emerge sys-kernel/gentoo-sources && '
@@ -93,6 +93,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
             print("SAVE TARBALL: Could not copy kernel config")
             return (False, '')
         #handler.build_kernel(arch, profile, get_gentoomuch_jobs(), kconfig)
+        #TODO: SWITCH TO UNPRIVILEGED USER
         cmd_str += "cd /usr/src/linux && "
         cmd_str += "rm /usr/src/linux/certs/signing-key.pem & "
         cmd_str += "KBUILD_BUILD_TIMESTAMP='' make CC=\"ccache gcc\" -j" + jobs + " && "
@@ -116,9 +117,6 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "cd / && "
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage"
     cmd_str += "' && " # Exit chroot
-    #cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
-    # cmd_str += "umount -fl /mnt/gentoo/var/tmp/portage && "
-    # cmd_str += "chown 1000:1000 -R /var/tmp/portage/* && "
     cmd_str += "umount -fl /mnt/gentoo/tmp && "
     cmd_str += "umount -fl /mnt/gentoo/proc && "
     cmd_str += "umount -fl /mnt/gentoo/sys && "
@@ -126,7 +124,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "umount -fl /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "umount -fl /mnt/gentoo/var/cache/binpkgs && "
     cmd_str += "umount -fl /mnt/gentoo/var/tmp/portage && "
-    cmd_str += "umount -fl /mnt/gentoo/mnt/ccache && "
+    cmd_str += "umount -fl /mnt/gentoo/mnt/ccache_portage && "
     cmd_str += "umount -fl /mnt/gentoo/usr/src && "
     cmd_str += "cd /mnt/gentoo && "
     cmd_str += "echo 'SAVING STAGE INTO TAR ARCHIVE' && "
