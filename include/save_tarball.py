@@ -97,10 +97,9 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         cmd_str += "cd /usr/src/linux && "
         cmd_str += "make install && "
         cmd_str += "make modules_install && "
+        cmd_str += "make clean && "
         cmd_str += 'emerge --onlydeps @module-rebuild && '
         cmd_str += 'emerge --usepkg n @module-rebuild && '
-        cmd_str += "rm certs/signing_key.pem & "
-        cmd_str += "rm certs/signing_key.x509 & "
     #cmd_str += "emerge --depclean --with-bdeps=n && " # Remove build deps
     cmd_str += "cd / && "
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage "
