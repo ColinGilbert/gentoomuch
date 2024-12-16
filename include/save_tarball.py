@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os, sys, docker, re
-from .gentoomuch_common import desired_packages_path, stages_path, output_path
+from .gentoomuch_common import desired_packages_path, stages_path, output_path, kconfigs_mountpoint
 from .read_file_lines import read_file_lines
 from .write_file_lines import write_file_lines
 from .get_dockerized_profile_name import get_dockerized_profile_name
@@ -15,8 +15,7 @@ from .get_gentoomuch_uid import get_gentoomuch_uid
 from .get_gentoomuch_gid import get_gentoomuch_gid
 from .get_gentoomuch_jobs import get_gentoomuch_jobs
 from .package_from_patch import package_from_patch
-
-hash_types = {'sha1', 'sha224', 'sha256', 'sh384', 'sha512'}
+from .build_kernel import build_kernel
 
 def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', emerge_kernel: bool = False):
     # Important to swap our active stage first!
@@ -57,6 +56,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "mount -t tmpfs none /mnt/gentoo/tmp && "
     cmd_str += "mount --rbind /sys /mnt/gentoo/sys && "
     cmd_str += "mount --make-rslave /mnt/gentoo/sys && "
+    #cmd_str += "mount -o bind /dev /mnt/gentoo/dev && "
     cmd_str += "mount --rbind /dev /mnt/gentoo/dev && "
     cmd_str += "mount --make-rslave /mnt/gentoo/dev && "
     cmd_str += "mount -t tmpfs none /mnt/gentoo/var/tmp && "
@@ -64,10 +64,12 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "mount --bind /var/tmp/portage /mnt/gentoo/var/tmp/portage && "
     cmd_str += "mount --bind /var/cache/binpkgs /mnt/gentoo/var/cache/binpkgs && "
     cmd_str += "mount --bind /usr/src /mnt/gentoo/usr/src && "
-    cmd_str += "mkdir /mnt/gentoo/mnt/ccache_portage && "
-    cmd_str += "mount --bind /mnt/ccache_portage /mnt/gentoo/mnt/ccache_portage && "
+    #cmd_str += "mkdir -p /mnt/gentoo/mnt/ccache_portage && "
+    #cmd_str += "mount --bind /mnt/ccache_portage /mnt/gentoo/mnt/ccache_portage && "
     cmd_str += "mkdir -p /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "mount --bind /var/db/repos/gentoo /mnt/gentoo/var/db/repos/gentoo && "
+    cmd_str += "mkdir -p /mnt/gentoo/mnt/kconfigs && "
+    cmd_str += "mount --bind /mnt/kconfigs /mnt/gentoo/mnt/kconfigs && "
     cmd_str += "echo 'UTC' > ./etc/timezone && "
     cmd_str += "echo 'nameserver 8.8.8.8' > ./etc/resolv.conf && "
     cmd_str += "chroot . /bin/bash -c '" # Enter chroot
@@ -83,39 +85,25 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                 else:
                     cmd_str += "emerge -j" + jobs + " --oneshot --onlydeps =" + package + " && "
                     cmd_str += "emerge -j" + jobs + " --oneshot --usepkg n =" + package + " && "
-    # cmd_str += "emerge --onlydeps sys-kernel/gentoo-sources && "
     if emerge_kernel:
         cmd_str += 'rm -rf /usr/src/* && '
         cmd_str += 'emerge sys-kernel/gentoo-sources && '
     if kconfig != '':
-        success = copy_kconf_to_staging(kconf)        #handler = kernel_handler()
-        if not success:
-            print("SAVE TARBALL: Could not copy kernel config")
-            return (False, '')
-        #handler.build_kernel(arch, profile, get_gentoomuch_jobs(), kconfig)
-        #TODO: SWITCH TO UNPRIVILEGED USER
+        cmd_str += "echo MAKING " + kconfig + " && "
+        results = build_kernel(arch, profile, kconfig, jobs)
+        if not results:
+            print("COULD NOT BUILD KERNEL " + kconfig)
+            return (False,'')
         cmd_str += "cd /usr/src/linux && "
-        cmd_str += "rm /usr/src/linux/certs/signing-key.pem & "
-        cmd_str += "KBUILD_BUILD_TIMESTAMP='' make CC=\"ccache gcc\" -j" + jobs + " && "
-        #cmd_str += "make -j" + jobs + " && "
         cmd_str += "make install && "
-        cmd_str += "make modules_install & "
-        cmd_str += 'emerge --onlydeps @modules_rebuild && '
-        cmd_str += 'emerge --usepkg n @modules_rebuild && '
-        cmd_str += "rm /usr/src/linux/certs/signing-key.pem & "
-        # Manual signing for kernel modules
-        if len(modules_to_sign) > 0:
-            if hash_algorithm in hash_types:
-                module_path = os.path.split(modules_to_sign)[0]
-                module_filename = os.path.split(modules_to_sign)[1]
-                cmd_str += "cd /lib/modules/linux-*/kernel/" + module_path + " && "
-                cmd_str += "/usr/src/linux/scripts/sign-file " + hash_algorithm + " /usr/src/linux/certs/signing_key.pem /usr/src/linux/certs/signing_key.x509 " + module_filename + " && "
-            else:
-                print("SAVE TARBALL FAILED: Invalid hash algorithm " + hash_algorithm)
-                return (False, '') 
+        cmd_str += "make modules_install && "
+        cmd_str += 'emerge --onlydeps @module-rebuild && '
+        cmd_str += 'emerge --usepkg n @module-rebuild && '
+        cmd_str += "rm certs/signing_key.pem & "
+        cmd_str += "rm certs/signing_key.x509 & "
     #cmd_str += "emerge --depclean --with-bdeps=n && " # Remove build deps
     cmd_str += "cd / && "
-    cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage"
+    cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage "
     cmd_str += "' && " # Exit chroot
     cmd_str += "umount -fl /mnt/gentoo/tmp && "
     cmd_str += "umount -fl /mnt/gentoo/proc && "
@@ -124,8 +112,8 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "umount -fl /mnt/gentoo/var/db/repos/gentoo && "
     cmd_str += "umount -fl /mnt/gentoo/var/cache/binpkgs && "
     cmd_str += "umount -fl /mnt/gentoo/var/tmp/portage && "
-    cmd_str += "umount -fl /mnt/gentoo/mnt/ccache_portage && "
     cmd_str += "umount -fl /mnt/gentoo/usr/src && "
+    cmd_str += "umount -fl /mnt/gentoo/mnt/kconfigs && "
     cmd_str += "cd /mnt/gentoo && "
     cmd_str += "echo 'SAVING STAGE INTO TAR ARCHIVE' && "
     cmd_str += "tar -cf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls && "
