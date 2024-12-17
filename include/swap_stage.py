@@ -20,7 +20,7 @@ def swap_stage(arch : str, profile : str, stage_define : str, upstream : bool, p
     dckr = docker.from_env()
     dckr_imgs = dckr.images.list()
     found = False
-    t = get_docker_tag(arch, profile, stage_define, bool(upstream))
+    t = get_docker_tag(arch, profile, stage_define, upstream)
     #print("TAG " + t)
     print("ATTEMPTING TO SWAP: " + t)
     code = os.system('docker rmi ' + active_image_tag) # To ensure we don't suffer from duplicates.

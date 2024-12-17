@@ -87,6 +87,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                 else:
                     cmd_str += "emerge -j" + jobs + " --oneshot --onlydeps =" + package + " && "
                     cmd_str += "emerge -j" + jobs + " --oneshot --usepkg n =" + package + " && "
+                    #cmd_str += "emerge --oneshot --usepkg n =" + package + " && "
     if emerge_kernel:
         cmd_str += 'rm -rf /usr/src/* && '
         cmd_str += 'emerge sys-kernel/gentoo-sources && '

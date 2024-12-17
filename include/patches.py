@@ -10,8 +10,8 @@ from .composefile import create_composefile
 from .package_from_patch import package_from_patch
 from .apply_saved_patches import apply_saved_patches
 
-def get_first_commit(repo_path : str) -> str:
-    return "git -C " + repo_path + " log | grep commit | tail -2 | head -1 | sed -e 's/commit //g' "
+# def get_first_commit(repo_path : str) -> str:
+#     return "git -C " + repo_path + " log | grep commit | tail -2 | head -1 | sed -e 's/commit //g' "
 
 
 def validate_package_format(package : str) -> bool:
@@ -20,12 +20,12 @@ def validate_package_format(package : str) -> bool:
         return False
     return True
 
-def strip_version(package_name) -> str:
-    return re.sub('-[0-9.]+$', '', strip_version_tag(package_name))
-    
-
 def strip_version_tag(package_name) -> str:
     return re.sub('-r[0-9]+$', '', package_name)
+
+def strip_version(package_name) -> str:
+    return re.sub('-[0-9.]+$', '', strip_version_tag(package_name))    
+
 
 # Here, we will do the tooling required for you to start patching a given package+version
 # Then it unpacks your ebuild into it, and initializes the git repository for patching
@@ -62,7 +62,7 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
     #TODO Change to desired profile
     valid, profile = get_desired_profile()
     if valid:
-        swap_stage(get_arch(), profile , 'gentoomuch/builder', False, patch_name)
+        swap_stage(get_arch(), profile , stage_define = 'gentoomuch/builder', upstream = False, patch_to_test = patch_name)
     else:
         print("Prep patch: Could not get profile")
         return False
@@ -102,28 +102,7 @@ def save_patch(patch_name : str) -> bool:
     p = os.path.join(saved_patches_path, patch_name)
     if not os.path.isdir(p):
         os.makedirs(p, exist_ok = True)
-    _send_diff(patches_workdir, p, patch_name)
-    return True
-
-def try_patch(profile: str, patch_name : str) -> bool:
-    valid, package_name = package_from_patch(patch_name, True)
-    if not valid:
-        print("Invalid patch name entered. Stopping.")
-        return False
-    patch_outdir = os.path.join(portage_output_path, 'patches')
-    cmd_str = 'emerge --onlydeps =' + package_name + ' && '
-    cmd_str += "emerge --usepkg n =" + package_name
-    if valid:
-        swap_stage(get_arch(), profile, 'gentoomuch/builder', False, str(patch_name))
-        code = os.system("cd " + output_path + " && docker-compose run gentoomuch-builder /bin/bash -c '" + cmd_str + "'")
-        if code == 0:
-            pass
-        return True
-    print("TRY_PATCH:: Could not try patch " + patch_name)
-    return False
-
-def _send_diff(path_from: str, path_to : str, patch_name : str) -> bool:
-    valid, versioned_package = package_from_patch(patch_name, True)
+    valid, versioned_package = package_from_patch(patch_name, from_workdir = True)
     if not valid == True:
         print("Send diff: Could not derive package name") 
         return False
@@ -145,3 +124,20 @@ def _send_diff(path_from: str, path_to : str, patch_name : str) -> bool:
     os.makedirs(final_output_dir, exist_ok = True)
     shutil.move(os.path.join(final_path, '.' + patch_name + '.patch'), os.path.join(final_output_dir,  patch_name + '.patch'))
     return True
+
+def try_patch(profile: str, patch_name : str) -> bool:
+    valid, package_name = package_from_patch(patch_name, from_workdir = True)
+    if not valid:
+        print("Invalid patch name entered. Stopping.")
+        return False
+    patch_outdir = os.path.join(portage_output_path, 'patches')
+    cmd_str = 'emerge --onlydeps =' + package_name + ' && '
+    cmd_str += "emerge --usepkg n =" + package_name
+    if valid:
+        swap_stage(get_arch(), profile, 'gentoomuch/builder', False, str(patch_name))
+        code = os.system("cd " + output_path + " && docker-compose run gentoomuch-builder /bin/bash -c '" + cmd_str + "'")
+        if code == 0:
+            pass
+        return True
+    print("TRY_PATCH:: Could not try patch " + patch_name)
+    return False
