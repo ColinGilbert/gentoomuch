@@ -68,7 +68,7 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     # results.append('    - ccache_portage:/mnt/ccache_portage\n')
     # results.append('    - ccache_kernel:/root/.cache\n')
     results.append('    - kernel_src:/usr/src\n')
-    results.append('    - ' + kernel_configs_path + ':' + kconfigs_mountpoint + ':ro\n')
+    results.append('    - ' + kernel_configs_path + ':' + kconfigs_mountpoint + '\n')
     # These are parts that have different permissions between the two types of containers.
     stages_mount_str    = '    - ./stages:/mnt/stages'    
     # Here we write differentiated stuff into our list.
