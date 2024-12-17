@@ -17,12 +17,14 @@ from .get_gentoomuch_jobs import get_gentoomuch_jobs
 from .package_from_patch import package_from_patch
 from .build_kernel import build_kernel
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', emerge_kernel: bool = False):
-    # Important to swap our active stage first!
-    if kconfig == '':
-        archive_name = get_local_stage3_name(arch, profile, stage_define)
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', emerge_kernel: bool = False, friendly_name = ''):
+    if friendly_name != '':
+        archive_name = friendly_name
     else:
-        archive_name = get_local_stage4_name(arch, profile, stage_define, kconfig)
+        if kconfig == '':
+            archive_name = get_local_stage3_name(arch, profile, stage_define)
+        else:
+            archive_name = get_local_stage4_name(arch, profile, stage_define, kconfig)
     for patch in patches:
         if patch != '':
             valid, package = package_from_patch(patch, False)
@@ -96,8 +98,8 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
             return (False,'')
         cmd_str += "cd /usr/src/linux && "
         cmd_str += "make install && "
-        cmd_str += "make modules_install && "
-        cmd_str += "make clean && "
+        cmd_str += "make modules_install & "
+        # cmd_str += "make clean && "
         cmd_str += 'emerge --onlydeps @module-rebuild && '
         cmd_str += 'emerge --usepkg n @module-rebuild && '
     #cmd_str += "emerge --depclean --with-bdeps=n && " # Remove build deps

@@ -175,7 +175,7 @@ elif prime_cmd == bootstrap_str:
         exit("Failed to load tarball")
     if not has_sync_happened():
         print("Syncing for first time!")
-        swap_stage(arch, profile, 'gentoomuch/builder', True)
+        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = True)
         code = sync()
         if code != 0:
             exit("Could not sync")
@@ -228,7 +228,7 @@ elif prime_cmd == patch_str:
                 patches.append(patch)
         profiles = get_profiles()
         for profile in profiles: 
-            valid, name = save_tarball(arch, profile, "gentoomuch/builder", upstream =  False, patches = patches, patches_have_been_compiled = False)
+            valid, name = save_tarball(arch, profile, stage_define = "gentoomuch/builder", upstream =  False, patches = patches, patches_have_been_compiled = False)
             if valid:
                results = containerize(os.path.join(stages_path, name), arch, profile, stage_define = 'gentoomuch/builder', upstream = False)
                if not results:
@@ -246,7 +246,7 @@ elif prime_cmd == kernel_str:
             exit("Need a kernel definition to prep kernel.")
         valid, profile = get_desired_profile()
         if valid:
-            prep_kernel_config(arch, profile, sys.argv[3])
+            prep_kernel_config(arch, profile, kconf = sys.argv[3])
         else:
             exit("You need to select a profile!")
     else:

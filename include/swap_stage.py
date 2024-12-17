@@ -11,16 +11,16 @@ from .composefile import create_composefile
 from .write_file_lines import write_file_lines
 from .apply_saved_patches import apply_saved_patches
 
-def swap_stage(arch : str, profile : str, stage_def : str, upstream : bool, patch_to_test: str = ''):
+def swap_stage(arch : str, profile : str, stage_define : str, upstream : bool, patch_to_test: str = ''):
     os.system('cd ' + output_path + ' && docker-compose down')
     # We assemble our (temporary) Portage directory from stages.
     combiner = portage_directory_combiner()
-    combiner.process_stage_defines(stage_def)
+    combiner.process_stage_defines(stage_define)
     # We now add patches
     dckr = docker.from_env()
     dckr_imgs = dckr.images.list()
     found = False
-    t = get_docker_tag(arch, profile, stage_def, bool(upstream))
+    t = get_docker_tag(arch, profile, stage_define, bool(upstream))
     #print("TAG " + t)
     print("ATTEMPTING TO SWAP: " + t)
     code = os.system('docker rmi ' + active_image_tag) # To ensure we don't suffer from duplicates.
