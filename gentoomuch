@@ -24,7 +24,7 @@ from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
 from include.get_profiles import get_profiles
 from include.remove_old_docker_images import remove_old_docker_images
 from include.prep_kernel_config import prep_kernel_config
-from include.containerize import containerize
+from include.containerize import Containerize
 
 # Our commandline keywords
 ls_str          = 'ls'
@@ -50,9 +50,9 @@ apply_str       = 'apply'
 kernel_str      = 'kernel'
 sources_str     = 'sources'
 test_str        = 'test'
-
+key_str         = 'key'
 # First word after the "gentoomuch" command.
-primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str, test_str )
+primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str, test_str, key_str )
 # Commands you can use ls and set to visualize and manipulate.
 #ls_and_set_usedwiths = (profile_str, stage_str)
 # 
@@ -88,6 +88,11 @@ def print_usage_patch():
 
 def print_no_profile():
     print("You need to set a base profile before continuing.")
+
+def print_usage_key():
+    print(usage_str + key_str + ' ' + set_str + ' <gpg.key.id>')
+    print(usage_str + key_str + ' ' + get_str)
+
 
 def print_usage():
     print(usage_str + freshroot_str)
@@ -251,6 +256,7 @@ elif prime_cmd == kernel_str:
             exit("You need to select a profile!")
     else:
         print_usage_kernel()
+        exit()
 ##################################
 # Deal with the freshroot command. 
 ##################################
@@ -274,12 +280,15 @@ elif prime_cmd == sync_str:
     if has_sync_happened():
         valid, profile = get_desired_profile()
         if valid:
-            swap_stage(arch, profile, 'gentoomuch/builder', False)
+            swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = False)
             sync()
         else:
             exit("Need to select a profile prior to sync.")
     else:
         exit("Need to bootstrap a profile prior to first sync")
+################################
+# Clean Gentoomuch environment. 
+################################
 elif prime_cmd == clean_str:
     remove_old_docker_images()
     code = os.system("rm -rf " + stages_path + "/*")

@@ -16,8 +16,10 @@ from .get_gentoomuch_gid import get_gentoomuch_gid
 from .get_gentoomuch_jobs import get_gentoomuch_jobs
 from .package_from_patch import package_from_patch
 from .build_kernel import build_kernel
+from .sign_stage import sign_stage
 
 def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', emerge_kernel: bool = False, friendly_name = ''):
+
     if friendly_name != '':
         archive_name = friendly_name
     else:
@@ -58,7 +60,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     # cmd_str += "tar xpvf /stage3-* --xattrs-include='*.*' --numeric-owner && "
     cmd_str += "tar xpf /stage3-* --numeric-owner && "
     cmd_str += "rm -rf /mnt/gentoo/etc/portage/* && "
-    cmd_str += "rsync -avXH /etc/portage/* /mnt/gentoo/etc/portage/ && "
+    cmd_str += "rsync -aXH /etc/portage/* /mnt/gentoo/etc/portage/ && "
     #cmd_str += "mount -t proc none /mnt/gentoo/proc && "
     #cmd_str += "mount -t tmpfs none /mnt/gentoo/tmp && "
     #cmd_str += "mount --rbind /sys /mnt/gentoo/sys && "
@@ -134,4 +136,6 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     if not code == 0:
         print("FAILED TO CREATE TARBALL: " + archive_name)
         return (False,'')
+    print("SIGNING STAGE " + archive_name)
+    sign_stage(path = os.path.join(stages_path, archive_name), gpg_key_id = key())
     return (True, archive_name)
