@@ -129,7 +129,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
     cmd_str += "\""
     swap_stage(arch, profile, stage_define, upstream)
-    print(cmd_str)
+    #print(cmd_str)
     code = os.system(cmd_str)
     if not code == 0:
         print("FAILED TO CREATE TARBALL: " + archive_name)
