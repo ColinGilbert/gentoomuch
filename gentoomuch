@@ -18,13 +18,13 @@ from include.get_desired_profile import get_desired_profile
 from include.run_build import run_build
 from include.get_docker_tag import get_docker_tag
 from include.save_tarball import save_tarball
-from include.load_tarball import load_tarball
+from include.load_upstream_tarball import load_upstream_tarball
 from include.patches import prep_patch, try_patch, save_patch
 from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
 from include.get_profiles import get_profiles
 from include.remove_old_docker_images import remove_old_docker_images
 from include.prep_kernel_config import prep_kernel_config
-from include.containerize import Containerize
+from include.containerize import containerize
 
 # Our commandline keywords
 ls_str          = 'ls'
@@ -50,9 +50,9 @@ apply_str       = 'apply'
 kernel_str      = 'kernel'
 sources_str     = 'sources'
 test_str        = 'test'
-key_str         = 'key'
+
 # First word after the "gentoomuch" command.
-primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str, test_str, key_str )
+primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str, test_str )
 # Commands you can use ls and set to visualize and manipulate.
 #ls_and_set_usedwiths = (profile_str, stage_str)
 # 
@@ -175,7 +175,7 @@ elif prime_cmd == bootstrap_str:
     if code:
       pass
     path = os.path.join(os.getcwd(), sys.argv[3])
-    code = load_tarball(arch, profile, path)
+    code = load_upstream_tarball(arch, profile, path)
     if not code:
         exit("Failed to load tarball")
     if not has_sync_happened():
