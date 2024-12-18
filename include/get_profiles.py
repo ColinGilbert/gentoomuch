@@ -8,5 +8,4 @@ def get_profiles():
         for p in profiles:
             if p.strip() != '':
                 results.append(p.strip())
-
     return results

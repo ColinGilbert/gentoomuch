@@ -11,13 +11,12 @@ builder_privileged_str = builder_str + '-privileged'
 updater_str = 'updater'
 patcher_str = 'patcher'
 
-containers = (builder_str, builder_privileged_str, updater_str, patcher_str)
+containers = (builder_str, updater_str, patcher_str)
 
 # This uses the current state of the work/portage directory and automatically creates a create_composefile that'll properly include each file. This avoids much handcruft.
 def create_composefile(output_path : str, exporting_patch : str = ''):
     lines = ['# Do not make changes to this file, as they will be overriden upon the next build.\n', 'services:\n']
     lines.extend(__output_config(builder_str))
-    #lines.extend(__output_config(builder_privileged_str))
     lines.extend(__output_config(updater_str))
     lines.extend(__output_config(patcher_str, exporting_patch))
     include_prefix = 'include/docker-compose/docker-compose.'
@@ -68,7 +67,7 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     # These are parts that have different permissions between the types of containers.
     stages_mount_str    = '    - ./stages:/mnt/stages'    
     # Here we write differentiated stuff into our list.
-    if is_builder or is_builder_privileged or is_patcher:
+    if is_builder or is_patcher:
         results.append(stages_mount_str + '\n')
         if exporting_patch != '':
             results.append('    - ' + os.path.join('./patches.work', exporting_patch) + ':' + patches_export_mountpoint + '\n')
@@ -80,9 +79,5 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
             if not f[0] == '.' and not f == 'README.md':
                 rel_path = os.path.relpath(dirpath, output_path)
                 results.append('    - ./' + os.path.join(rel_path, f) + ':' + os.path.join('/etc/', rel_path, f) + ':ro\n')
-    if is_builder_privileged:
-        results.append('    cap_add:\n')
-        results.append('    - CAP_SYS_ADMIN\n')
-        results.append('    - CAP_NET_ADMIN\n')
     # Finally, we return the list of string.
     return results
