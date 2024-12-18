@@ -50,7 +50,7 @@ Vagrant.configure("2") do |config|
   #
 
   config.vm.provider :libvirt do |libvirt|
-    libvirt.cpus= 8
+    libvirt.cpus=8
     libvirt.memory=32786
   end
 
