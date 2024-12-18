@@ -6,7 +6,7 @@ from include.gentoomuch_common import arch_config_path, config_path, output_path
 from include.freshroot import freshroot
 from include.sync import sync, has_sync_happened, set_sync_happened
 from include.swap_stage import swap_stage
-from include.composefile import create_composefile
+from include.create_composefile import create_composefile
 from include.tag_parser import tag_parser
 from include.get_active_stage import get_active_stage
 from include.list_stages import list_stages

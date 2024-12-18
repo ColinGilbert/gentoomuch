@@ -13,11 +13,11 @@ patcher_str = 'patcher'
 
 containers = (builder_str, builder_privileged_str, updater_str, patcher_str)
 
-# This uses the current state of the work/portage directory and automatically creates a composefile that'll properly include each file. This avoids much handcruft.
+# This uses the current state of the work/portage directory and automatically creates a create_composefile that'll properly include each file. This avoids much handcruft.
 def create_composefile(output_path : str, exporting_patch : str = ''):
     lines = ['# Do not make changes to this file, as they will be overriden upon the next build.\n', 'services:\n']
     lines.extend(__output_config(builder_str))
-    lines.extend(__output_config(builder_privileged_str))
+    #lines.extend(__output_config(builder_privileged_str))
     lines.extend(__output_config(updater_str))
     lines.extend(__output_config(patcher_str, exporting_patch))
     include_prefix = 'include/docker-compose/docker-compose.'
@@ -31,10 +31,8 @@ def create_composefile(output_path : str, exporting_patch : str = ''):
     lines.append('    driver: local\n')
     lines.append('  binpkgs:\n')
     lines.append('    driver: local\n')
-    # lines.append('  ccache_portage:\n')
-    # lines.append('    driver: local\n')
-    # lines.append('  ccache_kernel:\n')
-    # lines.append('    driver: local\n')
+    lines.append('  gentoo_root_tmp:\n')
+    lines.append('    driver: local\n')
     lines.append('  kernel_src:\n')
     lines.append('    driver: local\n')
     write_file_lines(os.path.join(output_path, 'docker-compose.yml'), lines)
@@ -42,7 +40,7 @@ def create_composefile(output_path : str, exporting_patch : str = ''):
 
 def __output_config(container_type_str : str, exporting_patch : str = ''):
     if not container_type_str in containers:
-        sys.exit('Gentoomuch.create-composefile: Invalid container type argument \"' + container_type_str  +  '\"')
+        sys.exit('Gentoomuch.create-create_composefile: Invalid container type argument \"' + container_type_str  +  '\"')
     is_builder              = bool(container_type_str == builder_str)
     is_builder_privileged   = bool(container_type_str == builder_privileged_str)
     is_updater              = bool(container_type_str == updater_str)
@@ -64,12 +62,10 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     results.append('    - binpkgs:/var/cache/binpkgs\n')
     results.append('    - distfiles:/var/cache/distfiles\n')
     results.append('    - ebuilds:/var/db/repos/gentoo\n')
-    results.append('    - ./emerge.logs:/var/tmp/portage\n')
-    # results.append('    - ccache_portage:/mnt/ccache_portage\n')
-    # results.append('    - ccache_kernel:/root/.cache\n')
     results.append('    - kernel_src:/usr/src\n')
+    results.append('    - gentoo_root_tmp:/mnt/gentoo\n')
     results.append('    - ' + kernel_configs_path + ':' + kconfigs_mountpoint + '\n')
-    # These are parts that have different permissions between the two types of containers.
+    # These are parts that have different permissions between the types of containers.
     stages_mount_str    = '    - ./stages:/mnt/stages'    
     # Here we write differentiated stuff into our list.
     if is_builder or is_builder_privileged or is_patcher:

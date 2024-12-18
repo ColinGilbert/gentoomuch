@@ -7,7 +7,7 @@ from .get_dockerized_profile_name import get_dockerized_profile_name
 from .get_dockerized_stagedef_name import get_dockerized_stagedef_name
 from .get_docker_tag import get_docker_tag
 from .docker_stage_exists import docker_stage_exists
-from .bootstrap_dockerfile import bootstrap_dockerfile
+from .create_dockerfile import create_dockerfile
 from .get_profiles import get_profiles
 from .save_profiles import save_profiles
 
@@ -31,7 +31,7 @@ def containerize(stages_path : str, arch : str, profile : str, stage_define : st
     tarball_name = os.path.split(stages_path)[1]
     new_tarball_path = os.path.join(bootstrap_dir, tarball_name) 
     # Now create our dockerfile.
-    open(dockerfile, 'w').write(bootstrap_dockerfile(tarball_name, profile))
+    open(dockerfile, 'w').write(create_dockerfile(tarball_name, profile))
     code = os.system('cp ' + stages_path + ' ' +  new_tarball_path)
     if code != 0:
         print("Could not copy tarball from " + stages_path + " to " + new_tarball_path)

@@ -6,7 +6,7 @@ from .get_gentoomuch_uid import get_gentoomuch_uid
 from .get_arch import get_arch
 from .swap_stage import swap_stage
 from .get_desired_profile import get_desired_profile
-from .composefile import create_composefile
+from .create_composefile import create_composefile
 from .package_from_patch import package_from_patch
 from .apply_saved_patches import apply_saved_patches
 

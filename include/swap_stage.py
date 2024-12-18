@@ -7,7 +7,7 @@ from .get_dockerized_stagedef_name import get_dockerized_stagedef_name
 from .get_dockerized_profile_name import get_dockerized_profile_name
 from .portage_directory_combiner import portage_directory_combiner
 from .get_docker_tag import get_docker_tag
-from .composefile import create_composefile
+from .create_composefile import create_composefile
 from .write_file_lines import write_file_lines
 from .apply_saved_patches import apply_saved_patches
 

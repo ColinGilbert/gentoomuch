@@ -3,7 +3,7 @@
 import os
 from .gentoomuch_common import arch_config_path, output_path, desired_stage_path, desired_profile_path
 from .swap_stage import swap_stage
-from .composefile import create_composefile
+from .create_composefile import create_composefile
 from .get_dockerized_profile_name import get_dockerized_profile_name
 from .get_dockerized_stagedef_name import get_dockerized_stagedef_name
 from .get_desired_profile import get_desired_profile

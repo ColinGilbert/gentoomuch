@@ -1,6 +1,6 @@
 import os
 from .gentoomuch_common import output_path, portage_output_path, saved_patches_path
-from .composefile import create_composefile
+from .create_composefile import create_composefile
 
 def apply_saved_patches():
     dirs = os.listdir(saved_patches_path)
