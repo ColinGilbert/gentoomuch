@@ -45,6 +45,8 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     gid = get_gentoomuch_gid()
     jobs = get_gentoomuch_jobs()
     print('PACKAGES TO INSTALL : ' + packages_str)
+    if kconfig:
+        print("KCONFIG: " + kconfig)
       # The following dogs' meal of a command preps a stage inside a docker container. It then changes root into it and emerges. Then, it exits the chroot, unmounts all temporaries, and packs a tarball as "stage3-<arch>-<base>-<user-stage-define>.tar.gz"
     cmd_str = "cd " + output_path + " && "
     cmd_str += "docker-compose run gentoomuch-builder /bin/bash -c \""
@@ -52,9 +54,11 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     #cmd_str += "mkdir -p /mnt/gentoo/etc/portage &&"
     cmd_str += "rm -rf /mnt/gentoo/* && "
     cmd_str += "cd /mnt/gentoo && "
-    cmd_str += "tar xpf /stage3-* --xattrs-include='*.*' --numeric-owner && "
+    # cmd_str += "echo EXTRACTING STAGE3 ARCHIVE && "
+    # cmd_str += "tar xpvf /stage3-* --xattrs-include='*.*' --numeric-owner && "
+    cmd_str += "tar xpf /stage3-* --numeric-owner && "
     cmd_str += "rm -rf /mnt/gentoo/etc/portage/* && "
-    cmd_str += "rsync -aXH /etc/portage/* /mnt/gentoo/etc/portage/ && "
+    cmd_str += "rsync -avXH /etc/portage/* /mnt/gentoo/etc/portage/ && "
     #cmd_str += "mount -t proc none /mnt/gentoo/proc && "
     #cmd_str += "mount -t tmpfs none /mnt/gentoo/tmp && "
     #cmd_str += "mount --rbind /sys /mnt/gentoo/sys && "
@@ -92,16 +96,17 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     if emerge_kernel:
         cmd_str += 'rm -rf /usr/src/* && '
         cmd_str += 'emerge --sys-kernel/gentoo-sources && '
-    if kconfig != '':
-        cmd_str += "echo MAKING " + kconfig + " && "
+    if kconfig:
+        cmd_str += "echo 'MAKING " + kconfig + "' && "
         # results = build_kernel(arch, profile, kconfig, jobs)
         # if not results:
         #     print("COULD NOT BUILD KERNEL " + kconfig)
         #     return (False,'')
+        cmd_str += "cp " + os.path.join(kconfigs_mountpoint, kconfig + ".kconf") + " /usr/src/linux/.config && "
         cmd_str += "cd /usr/src/linux && "
         cmd_str += "make -j" + jobs + " && "
         cmd_str += "INSTALL_PATH=/mnt/gentoo/boot make install && "
-        cmd_str += "INSTALL_MOD_PATH=/mnt/gentoo make modules_install & "
+        cmd_str += "INSTALL_MOD_PATH=/mnt/gentoo make modules_install && "
         # cmd_str += "make clean && "
         cmd_str += 'emerge --onlydeps --root=/mnt/gentoo @module-rebuild && '
         cmd_str += 'emerge --usepkg n --root=/mnt/gentoo @module-rebuild && '
@@ -124,6 +129,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
     cmd_str += "\""
     swap_stage(arch, profile, stage_define, upstream)
+    print(cmd_str)
     code = os.system(cmd_str)
     if not code == 0:
         print("FAILED TO CREATE TARBALL: " + archive_name)
