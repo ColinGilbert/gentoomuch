@@ -3,6 +3,8 @@ from .get_profiles import get_profiles
 from .gentoomuch_common import stage4_defines_path, saved_patches_path
 from .save_tarball import save_tarball
 from .get_profiles import get_profiles
+from .clean_kernel_sources import clean_kernel_sources
+from .get_desired_profile import get_desired_profile
 
 def pipeline(arch: str):
     # Get all stage 4 definitions
@@ -44,4 +46,5 @@ def pipeline(arch: str):
         if not valid:
             print("PIPELINE BROKEN TRYING TO SAVE: " + stage4_name)
             return False
+    clean_kernel_sources(arch, get_desired_profile())
     return True
