@@ -40,8 +40,6 @@ arch_config_path		        = os.path.join(env_settings_path, 'arch')
 # These pertain to the stage signing.
 digests_ext                     =".DIGESTS"
 asc_ext			                = '.asc'
-gentoo_signing_key		        = "0xBB572E0E2D182910"
-gentoo_upstream_url             = "http://ftp-osl.osuosl.org/pub/gentoo/releases/"
 # This is for the Docker tags that we access as we work.
 image_tag_base			        = 'localhost:5000/gentoomuch-'
 active_image_tag		        = image_tag_base + 'current:latest'
