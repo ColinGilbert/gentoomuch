@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os, gnupg, hashlib
-from .gentoomuch_common import stages_path, gpg_path, asc_ext, digests_ext, gentoo_signing_key, gentoo_upstream_url
+from .gentoomuch_common import stages_path, gpg_path, asc_ext, digests_ext
 from .read_file_lines import read_file_lines
 
 
