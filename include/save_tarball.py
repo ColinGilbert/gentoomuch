@@ -18,7 +18,7 @@ from .package_from_patch import package_from_patch
 from .build_kernel import build_kernel
 from .sign_stage import sign_stage
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', emerge_kernel: bool = False, strip_deps: bool = False, friendly_name : str = ''):
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', emerge_kernel: bool = False, strip_deps: bool = False, friendly_name : str = '', custom_stage: str = ''):
     if friendly_name != '':
         archive_name = friendly_name + ".tar.gz"
     else:
@@ -58,7 +58,9 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "rsync -aXH /etc/portage/* /mnt/gentoo/etc/portage/ && "
     cmd_str += "echo 'UTC' > /etc/timezone && "
     cmd_str += "echo 'nameserver 8.8.8.8' > /etc/resolv.conf && "
-    cmd_str += "emerge --with-bdeps=y --root=/mnt/gentoo -j" + jobs + (" --emptytree " if upstream else " -uD --changed-use --newuse ") + packages_str + "@world && "
+    cmd_str += "emerge --with-bdeps=y --root=/mnt/gentoo -j" + jobs + (" --emptytree " if upstream else " -uD --changed-use --newuse ") + packages_str + " @world && "
+    if custom_stage != '':
+        cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch/builder && "
     for patch in patches:
         if patch != '':
             valid, package = package_from_patch(patch, False)
@@ -89,7 +91,10 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "tar -cf  /mnt/stages/" + archive_name + " --exclude='./usr/src' . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls  && "
     cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
     cmd_str += "\""
-    swap_stage(arch, profile, stage_define, upstream)
+    if upstream:
+        swap_stage(arch, profile, stage_define =  '', upstream = True)
+    else:
+        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = False, custom_stage = custom_stage)
     code = os.system(cmd_str)
     if not code == 0:
         print("FAILED TO CREATE TARBALL: " + archive_name)

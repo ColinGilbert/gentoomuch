@@ -18,6 +18,7 @@ class portage_directory_combiner:
     def process_stage_defines(self, current_stage):
         msg_prefix = self.msg_prefix + 'process_stage_defines() - '
         current_stage = current_stage.strip()
+        print("PORTAGE DIRECTORY COMBINER: CURRENT STAGE: " + current_stage)
         # First, we ensure our target output directory is sane.
         self.__prep()
         # Determine whether the stage defines path exists.
@@ -42,7 +43,7 @@ class portage_directory_combiner:
         if os.path.isfile(flags_defines_path):
             flags_conf = read_file_lines(flags_defines_path)
         else:
-            sys.exit(msg_prefix + 'Stage3 flag definition file: ' + flags_defines_path + ' does not exist.')
+            sys.exit(msg_prefix + 'Stage3 flags definition file: ' + flags_defines_path + ' does not exist.')
         # Now we can loop over all local portages, accumulating them.
         for local in flags_conf:
             combined_path = os.path.join(local_config_basepath, local.strip())
@@ -57,8 +58,8 @@ class portage_directory_combiner:
         if os.path.isfile(combined_path):
             self.todo['packages'] = read_file_lines(combined_path)
         combined_path = os.path.join(current_stage3_defines_path, 'hooks')
-        if os.path.isfile(combined_path):
-            self.todo['hooks'] = read_file_lines(combined_path)
+        # if os.path.isfile(combined_path):
+        #     self.todo['hooks'] = read_file_lines(combined_path)
         # Now we write-out the files themselves
         self.accum.writeout()
 

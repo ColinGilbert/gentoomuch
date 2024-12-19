@@ -2,7 +2,7 @@
 
 # This sets the currently active basestage.
 import os, sys, re, docker
-from .gentoomuch_common import output_path, config_path, image_tag_base, active_image_tag, desired_packages_path, desired_hooks_path
+from .gentoomuch_common import output_path, portage_output_path, config_path, image_tag_base, active_image_tag, desired_packages_path, desired_hooks_path
 from .get_dockerized_stagedef_name import get_dockerized_stagedef_name
 from .get_dockerized_profile_name import get_dockerized_profile_name
 from .portage_directory_combiner import portage_directory_combiner
@@ -11,11 +11,17 @@ from .create_composefile import create_composefile
 from .write_file_lines import write_file_lines
 from .apply_saved_patches import apply_saved_patches
 
-def swap_stage(arch : str, profile : str, stage_define : str, upstream : bool, patch_to_test: str = ''):
+def swap_stage(arch : str, profile : str, stage_define : str, upstream : bool, patch_to_test: str = '', custom_stage = ''):
     os.system('cd ' + output_path + ' && docker-compose down')
     # We assemble our (temporary) Portage directory from stages.
+    code = os.system('rm -rf ' + portage_output_path + "/*")
+    if code == 0:
+        pass
     combiner = portage_directory_combiner()
-    combiner.process_stage_defines(stage_define)
+    if custom_stage == '':
+        combiner.process_stage_defines(stage_define)
+    else:
+        combiner.process_stage_defines(custom_stage)
     # We now add patches
     dckr = docker.from_env()
     dckr_imgs = dckr.images.list()
@@ -44,9 +50,9 @@ def swap_stage(arch : str, profile : str, stage_define : str, upstream : bool, p
     if 'packages' in combiner.todo:
         if len(combiner.todo['packages']) > 0:
             write_file_lines(desired_packages_path, combiner.todo['packages'])
-    if 'hooks' in combiner.todo:
-        if len(combiner.todo['hooks']) > 0:
-            write_file_lines(desired_hooks_path, combiner.todo['hooks'])
+    # if 'hooks' in combiner.todo:
+    #     if len(combiner.todo['hooks']) > 0:
+    #         write_file_lines(desired_hooks_path, combiner.todo['hooks'])
     apply_saved_patches()
     results = create_composefile(output_path, patch_to_test)
     if results:

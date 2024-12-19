@@ -22,6 +22,7 @@ class portage_directory:
                 if f[0] != '.':
                     current_path = os.path.relpath(dirpath, local_path)
                     current_file = os.path.join(current_path, f)
+                    print("PORTAGE COMBINER: CURRENT FILE: " + current_file)
                     if not current_file in self.accumulators: # Add a munger object to prevent a crash
                         self.accumulators[current_file] = munger(current_path, f)
                     for line in read_file_lines(os.path.join(dirpath, f)): # Here we do our actual file-reading
