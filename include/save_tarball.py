@@ -54,13 +54,14 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "rm -rf /mnt/gentoo/* && "
     cmd_str += "cd /mnt/gentoo && "
     cmd_str += "tar xpf /stage3-* --numeric-owner && "
+    cmd_str += "mkdir -p /usr/src/linux && "
+    cmd_str += "mkdir -p /mnt/gentoo/usr/src/linux && "
+    cmd_str += "ln -s /usr/src/linux /mnt/gentoo/usr/src/linux && "
     cmd_str += "rm -rf /mnt/gentoo/etc/portage/* && "
     cmd_str += "rsync -aXH /etc/portage/* /mnt/gentoo/etc/portage/ && "
     cmd_str += "echo 'UTC' > /etc/timezone && "
     cmd_str += "echo 'nameserver 8.8.8.8' > /etc/resolv.conf && "
     cmd_str += "emerge --with-bdeps=y --root=/mnt/gentoo -j" + jobs + (" --emptytree " if upstream else " -uD --changed-use --newuse ") + packages_str + " @world && "
-    if custom_stage != '':
-        cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch/builder && "
     for patch in patches:
         if patch != '':
             valid, package = package_from_patch(patch, False)
@@ -72,27 +73,29 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --usepkg n =" + package + " && "
     if emerge_kernel:
         cmd_str += 'rm -rf /usr/src/* && '
-        cmd_str += 'emerge --root=/ sys-kernel/gentoo-sources && '
+        cmd_str += 'emerge --root=/mnt/gentoo sys-kernel/gentoo-sources && '
     if kconfig:
         cmd_str += "echo 'MAKING " + kconfig + "' && "
         cmd_str += "cp " + os.path.join(kconfigs_mountpoint, kconfig + ".kconf") + " /usr/src/linux/.config && "
-        cmd_str += "cd /usr/src/linux && "
+        cmd_str += "cd /mnt/gentoo/usr/src/linux && "
         cmd_str += "make -j" + jobs + " && "
         cmd_str += "INSTALL_PATH=/mnt/gentoo/boot make install && "
         cmd_str += "INSTALL_MOD_PATH=/mnt/gentoo make modules_install && "
         cmd_str += 'emerge --onlydeps --root=/mnt/gentoo @module-rebuild && '
         cmd_str += 'emerge --usepkg n --root=/mnt/gentoo @module-rebuild && '
+    if custom_stage != '':
+        cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch/builder && "
     if strip_deps:
         cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
     cmd_str += "cd / && "
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
     cmd_str += "cd /mnt/gentoo && "
     cmd_str += "echo 'SAVING STAGE INTO TAR ARCHIVE' && "
-    cmd_str += "tar -cf  /mnt/stages/" + archive_name + " --exclude='./usr/src' . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls  && "
+    cmd_str += "tar --exclude='./usr/src' -cf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls  && "
     cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
     cmd_str += "\""
     if upstream:
-        swap_stage(arch, profile, stage_define =  '', upstream = True)
+        swap_stage(arch, profile, stage_define =  'gentoomuch/builder', upstream = True)
     else:
         swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = False, custom_stage = custom_stage)
     code = os.system(cmd_str)

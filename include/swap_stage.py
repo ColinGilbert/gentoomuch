@@ -12,6 +12,7 @@ from .write_file_lines import write_file_lines
 from .apply_saved_patches import apply_saved_patches
 
 def swap_stage(arch : str, profile : str, stage_define : str, upstream : bool, patch_to_test: str = '', custom_stage = ''):
+    print("SWAPPING STAGE")
     os.system('cd ' + output_path + ' && docker-compose down')
     # We assemble our (temporary) Portage directory from stages.
     code = os.system('rm -rf ' + portage_output_path + "/*")

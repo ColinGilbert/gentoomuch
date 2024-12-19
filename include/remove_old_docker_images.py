@@ -8,7 +8,5 @@ def remove_old_docker_images():
             dkr.images.remove(i.id, True, False)
         else:
             for t in i.tags:
-                if not t.startswith('localhost:5000/gentoomuch-'):
-                    continue
-                if t.split('/')[1].split(':')[1] == 'upstream':
+                if t.startswith('localhost:5000/gentoomuch-') and t.split('/')[1].split(':')[1] == 'upstream':
                     dkr.images.remove(i.id, True, False)

@@ -99,11 +99,11 @@ def print_usage():
     print(usage_str + clean_str)
 
 # We do this every time!
-arch = open(arch_config_path).read().strip()
-
-
-#get_profiles()
-
+if os.path.isfile(arch_config_path):
+    with open(arch_config_path) as file:
+        arch = file.read().strip()
+else:
+    exit("You need an arch config (amd64|arm64) at " + arch_config_path)
 # Now, we get properly started.
 ########################
 # Get the first command.
@@ -243,11 +243,7 @@ elif prime_cmd == kernel_str:
     if len(sys.argv) > 2 and sys.argv[2] == prep_str:
         if not len(sys.argv) > 3:
             exit("Need a kernel definition to prep kernel.")
-        valid, profile = get_desired_profile()
-        if valid:
-            prep_kernel_config(arch, profile, kconf = sys.argv[3])
-        else:
-            exit("You need to select a profile!")
+            prep_kernel_config(arch, profile = get_desired_profile(), kconf = sys.argv[3])
     else:
         print_usage_kernel()
         exit()
@@ -255,11 +251,7 @@ elif prime_cmd == kernel_str:
 # Deal with the freshroot command. 
 ##################################
 elif prime_cmd == freshroot_str:
-    valid, profile = get_desired_profile()
-    if valid: 
-        freshroot(arch, profile)
-    else:
-        exit("You need to set a profile!")
+    freshroot(arch, profile = get_desired_profile())
 #######################
 # Run pipelined builds.
 #######################
