@@ -18,9 +18,9 @@ from .package_from_patch import package_from_patch
 from .build_kernel import build_kernel
 from .sign_stage import sign_stage
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', emerge_kernel: bool = False, strip_deps = False, friendly_name = ''):
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', emerge_kernel: bool = False, strip_deps: bool = False, friendly_name : str = ''):
     if friendly_name != '':
-        archive_name = friendly_name
+        archive_name = friendly_name + ".tar.gz"
     else:
         if kconfig == '':
             archive_name = get_local_stage3_name(arch, profile, stage_define)
@@ -58,7 +58,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "rsync -aXH /etc/portage/* /mnt/gentoo/etc/portage/ && "
     cmd_str += "echo 'UTC' > /etc/timezone && "
     cmd_str += "echo 'nameserver 8.8.8.8' > /etc/resolv.conf && "
-    cmd_str += "emerge --with-bdeps=y -j" + jobs + (" --emptytree " if upstream else " -uD --changed-use --newuse ") + packages_str + "@world && "
+    cmd_str += "emerge --with-bdeps=y --root=/mnt/gentoo -j" + jobs + (" --emptytree " if upstream else " -uD --changed-use --newuse ") + packages_str + "@world && "
     for patch in patches:
         if patch != '':
             valid, package = package_from_patch(patch, False)
@@ -70,7 +70,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --usepkg n =" + package + " && "
     if emerge_kernel:
         cmd_str += 'rm -rf /usr/src/* && '
-        cmd_str += 'emerge --sys-kernel/gentoo-sources && '
+        cmd_str += 'emerge --root=/ sys-kernel/gentoo-sources && '
     if kconfig:
         cmd_str += "echo 'MAKING " + kconfig + "' && "
         cmd_str += "cp " + os.path.join(kconfigs_mountpoint, kconfig + ".kconf") + " /usr/src/linux/.config && "
@@ -81,12 +81,12 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         cmd_str += 'emerge --onlydeps --root=/mnt/gentoo @module-rebuild && '
         cmd_str += 'emerge --usepkg n --root=/mnt/gentoo @module-rebuild && '
     if strip_deps:
-        cmd_str += "emerge --depclean --with-bdeps=n && "
+        cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
     cmd_str += "cd / && "
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
     cmd_str += "cd /mnt/gentoo && "
     cmd_str += "echo 'SAVING STAGE INTO TAR ARCHIVE' && "
-    cmd_str += "tar -cf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls && "
+    cmd_str += "tar -cf  /mnt/stages/" + archive_name + " --exclude='./usr/src' . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls  && "
     cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
     cmd_str += "\""
     swap_stage(arch, profile, stage_define, upstream)
@@ -95,5 +95,5 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         print("FAILED TO CREATE TARBALL: " + archive_name)
         return (False,'')
     print("SIGNING STAGE " + archive_name)
-    sign_stage(path = os.path.join(stages_path, archive_name), gpg_key_id = key())
+    sign_stage(path = os.path.join(stages_path, archive_name))
     return (True, archive_name)

@@ -7,7 +7,6 @@ from .get_active_stage import get_active_stage
 from .tag_parser import tag_parser
 
 builder_str = 'builder'
-builder_privileged_str = builder_str + '-privileged'
 updater_str = 'updater'
 patcher_str = 'patcher'
 
@@ -41,7 +40,6 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     if not container_type_str in containers:
         sys.exit('Gentoomuch.create-create_composefile: Invalid container type argument \"' + container_type_str  +  '\"')
     is_builder              = bool(container_type_str == builder_str)
-    is_builder_privileged   = bool(container_type_str == builder_privileged_str)
     is_updater              = bool(container_type_str == updater_str)
     is_patcher              = bool(container_type_str == patcher_str)
     # Our results will be a list of strings.

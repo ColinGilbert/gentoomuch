@@ -25,6 +25,7 @@ from include.get_profiles import get_profiles
 from include.remove_old_docker_images import remove_old_docker_images
 from include.prep_kernel_config import prep_kernel_config
 from include.containerize import containerize
+from include.pipeline import pipeline
 
 # Our commandline keywords
 ls_str          = 'ls'
@@ -67,7 +68,6 @@ def print_usage_stage():
     print(usage_str + stage_str + ' ' + build_str + ' <profile.name> <stage.definition>')
     print(usage_str + stage_str + ' ' + build_str + ' <profile.name> <stage.definition> <kernel.config>')
 
-
 def print_usage_kernel():
     print(usage_str + kernel_str + ' ' + prep_str + ' <kernel.config>')
     # print(usage_str + kernel_str + ' ' + build_str + ' <kernel.config>')
@@ -88,11 +88,6 @@ def print_usage_patch():
 
 def print_no_profile():
     print("You need to set a base profile before continuing.")
-
-def print_usage_key():
-    print(usage_str + key_str + ' ' + set_str + ' <gpg.key.id>')
-    print(usage_str + key_str + ' ' + get_str)
-
 
 def print_usage():
     print(usage_str + freshroot_str)
@@ -271,8 +266,11 @@ elif prime_cmd == freshroot_str:
 #######################
 elif prime_cmd == pipeline_str:
     print('Running pipeline')
-    # Get stage 3 defines and build them
-    # Get stage 4 defines and build them
+    results = pipeline(arch)
+    if results:
+        print("PIPELINE SUCCESS")
+    else:
+        print("PIPELINE FAILURE :(")
 ####################
 # Sync Portage tree. 
 ####################

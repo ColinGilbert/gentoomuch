@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-import os, shutil
-from pathlib import Path
+import os
 from .gentoomuch_common import gentoo_upstream_url, gentoo_signing_key, stages_path, asc_ext
 from .verify_tarball import verify_tarball
 from .containerize import containerize
