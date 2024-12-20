@@ -18,7 +18,7 @@ from .package_from_patch import package_from_patch
 from .build_kernel import build_kernel
 from .sign_stage import sign_stage
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', emerge_kernel: bool = False, strip_deps: bool = False, friendly_name : str = '', custom_stage: str = ''):
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', strip_deps: bool = False, friendly_name : str = '', custom_stage: str = ''):
     if friendly_name != '':
         archive_name = friendly_name + ".tar.gz"
     else:
@@ -55,14 +55,15 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "tar xpf /stage3-* --numeric-owner && "
     # cmd_str += "mkdir -p /usr/src/linux && "
     cmd_str += "mkdir -p /mnt/gentoo/usr/src && "
-    if not upstream:
-        cmd_str += "ln -s /usr/src/linux /mnt/gentoo/usr/src/linux && "
     cmd_str += "rm -rf /mnt/gentoo/etc/portage/* && "
     cmd_str += "rsync -aXH /etc/portage/* /mnt/gentoo/etc/portage/ && "
-    cmd_str += "emerge --root=/ pigz && "
     cmd_str += "echo 'UTC' > /etc/timezone && "
     cmd_str += "echo 'nameserver 8.8.8.8' > /etc/resolv.conf && "
-    cmd_str += "emerge --with-bdeps=y --root=/mnt/gentoo -j" + jobs + (" --emptytree " if upstream else " -uD --changed-use --newuse ") + packages_str + " @world && "
+    if not upstream:
+        cmd_str += "ln -s /usr/src /mnt/gentoo/usr/src && "
+    if upstream:
+        cmd_str += "emerge --root=/ pigz && "
+    cmd_str += "emerge --with-bdeps=y --root=/mnt/gentoo -j" + jobs + (" --emptytree gentoo-sources " if upstream else " -uD --changed-use --newuse ") + packages_str + " @world && "
     for patch in patches:
         if patch != '':
             valid, package = package_from_patch(patch, False)
@@ -72,13 +73,10 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                 else:
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --onlydeps =" + package + " && "
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --usepkg n =" + package + " && "
-    if emerge_kernel:
-        cmd_str += 'rm -rf /usr/src/* && '
-        cmd_str += 'emerge --root=/mnt/gentoo sys-kernel/gentoo-sources && '
     if kconfig:
         cmd_str += "echo 'MAKING " + kconfig + "' && "
         cmd_str += "cp " + os.path.join(kconfigs_mountpoint, kconfig + ".kconf") + " /usr/src/linux/.config && "
-        cmd_str += "cd /mnt/gentoo/usr/src/linux && "
+        cmd_str += "cd /usr/src/linux && "
         cmd_str += "make -j" + jobs + " && "
         cmd_str += "INSTALL_PATH=/mnt/gentoo/boot make install && "
         cmd_str += "INSTALL_MOD_PATH=/mnt/gentoo make modules_install && "
@@ -86,6 +84,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         cmd_str += 'emerge --usepkg n --root=/mnt/gentoo @module-rebuild && '
     if custom_stage != '':
         cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch/builder && "
+        cmd_str += "emerge --root=/mnt/gentoo " + packages_str + " && "
     if strip_deps:
         cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
     cmd_str += "cd / && "

@@ -25,6 +25,7 @@ from include.remove_old_docker_images import remove_old_docker_images
 from include.prep_kernel_config import prep_kernel_config
 from include.containerize import containerize
 from include.pipeline import pipeline
+from include.update_kernel import update_kernel
 
 # Our commandline keywords
 ls_str          = 'ls'
@@ -46,13 +47,14 @@ prep_str        = 'prep'
 try_str         = 'try'
 save_str        = 'save'
 clean_str       = 'clean'
-apply_str       = 'apply'
+compile_str     = 'compile'
 kernel_str      = 'kernel'
 sources_str     = 'sources'
 test_str        = 'test'
+update_str      = 'update'
 
 # First word after the "gentoomuch" command.
-primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str, test_str )
+primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str, )
 # Commands you can use ls and set to visualize and manipulate.
 #ls_and_set_usedwiths = (profile_str, stage_str)
 # 
@@ -69,7 +71,7 @@ def print_usage_stage():
 
 def print_usage_kernel():
     print(usage_str + kernel_str + ' ' + prep_str + ' <kernel.config>')
-    # print(usage_str + kernel_str + ' ' + build_str + ' <kernel.config>')
+    print(usage_str + kernel_str + ' ' + update_str)
 
 def print_usage_profile():
     print(usage_str + profile_str + ' ' + ls_str)
@@ -83,7 +85,7 @@ def print_usage_patch():
     print(patch_usage + prep_str + '  <patch.name> <package.name> <version-str>')
     print(patch_usage + try_str + ' <patch.name>')
     print(patch_usage + save_str + ' <patch.name>')
-    print(patch_usage + apply_str)
+    print(patch_usage + compile_str)
 
 def print_no_profile():
     print("You need to set a base profile before continuing.")
@@ -219,7 +221,7 @@ elif prime_cmd == patch_str:
             save_patch(patch_name)
         else:
             exit("Which patch do you wish to save?")
-    elif len(sys.argv) > 2 and sys.argv[2] == apply_str:
+    elif len(sys.argv) > 2 and sys.argv[2] == compile_str:
         patches= []
         for patch in os.listdir(saved_patches_path):
             #TODO: Collect patch names into list
@@ -240,10 +242,14 @@ elif prime_cmd == patch_str:
 # Handle kernel-related tasks   
 ##############################
 elif prime_cmd == kernel_str:
-    if len(sys.argv) > 2 and sys.argv[2] == prep_str:
-        if not len(sys.argv) > 3:
-            exit("Need a kernel definition to prep kernel.")
-            prep_kernel_config(arch, profile = get_desired_profile(), kconf = sys.argv[3])
+    if len(sys.argv) > 2:
+        if sys.argv[2] == prep_str:
+            if len(sys.argv) > 3:
+                prep_kernel_config(arch, profile = get_desired_profile(), kconf = sys.argv[3])
+            else:
+                exit("Need a kernel definition to prep kernel.")
+        if sys.argv[2] == update_str:
+                update_kernel(arch)
     else:
         print_usage_kernel()
         exit()

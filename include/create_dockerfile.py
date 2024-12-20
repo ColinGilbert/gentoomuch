@@ -14,7 +14,7 @@ def create_dockerfile(tarball_name: str, profile: str) -> str:
     results += 'WORKDIR /\n'
     results += 'RUN mkdir -p /mnt/stages \\\n'
     results += '&& mkdir -p /mnt/user-data \\\n'
-    results += '&& mkdir -p /mnt/gentoo \\\n'
+    results += '&& mkdir -p /mnt/gentoo/usr \\\n'
     #results += '&& mkdir -p /mnt/ccache_portage \\\n'
     results += '&& mkdir -p ' + kconfigs_mountpoint + ' \\\n'
     results += '&& rm -rf /etc/portage/package.use \\\n'
