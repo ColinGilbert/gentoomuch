@@ -35,6 +35,10 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     print("CREATING TARBALL: " + archive_name + " Using upstream image: " + str(upstream))
     if os.path.isfile(os.path.join(stages_path, archive_name)):
         os.remove(os.path.join(stages_path, archive_name))
+    if upstream:
+        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = True)
+    else:
+        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = False, custom_stage = custom_stage)
     packages = []
     if os.path.isfile(desired_packages_path):
         packages = read_file_lines(desired_packages_path)
@@ -94,13 +98,9 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
     cmd_str += "cd /mnt/gentoo && "
     cmd_str += "echo 'SAVING STAGE INTO TAR ARCHIVE' && "
-    cmd_str += "tar --exclude='./usr/src' -cf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls  && "
+    cmd_str += "tar --exclude='./usr/src/*' -cf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls  && "
     cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
     cmd_str += "\""
-    if upstream:
-        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = True)
-    else:
-        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = False, custom_stage = custom_stage)
     code = os.system(cmd_str)
     if not code == 0:
         print("FAILED TO CREATE TARBALL: " + archive_name)

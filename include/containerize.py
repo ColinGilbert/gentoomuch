@@ -28,15 +28,16 @@ def containerize(path : str, arch : str, profile : str, stage_define : str, upst
     bootstrap_dir = os.path.join(output_path, 'bootstrap')
     dockerfile = os.path.join(bootstrap_dir, 'Dockerfile')
     os.makedirs(bootstrap_dir, exist_ok = True)
+    # Delete the dockerfile, if present from another build...
     if len(os.listdir(bootstrap_dir)) > 0:
         os.system('rm -rf ' + bootstrap_dir + '/*')
-    # Delete the dockerfile, if present from another build...
-    if os.path.isfile(dockerfile):
-        os.remove(dockerfile)
     tarball_name = os.path.split(path)[1]
     new_tarball_path = os.path.join(bootstrap_dir, tarball_name) 
     # Now create our dockerfile.
-    open(dockerfile, 'w').write(create_dockerfile(tarball_name, profile))
+    if os.path.isfile(dockerfile):
+        os.remove(dockerfile)
+    with open(dockerfile, 'w') as file:
+        file.write(create_dockerfile(tarball_name, profile))
     code = os.system('cp ' + path + ' ' +  new_tarball_path)
     if code != 0:
         print("Could not copy tarball from " + path + " to " + new_tarball_path)
