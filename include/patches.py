@@ -60,12 +60,9 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
     # Now we assemble the actual command string.
     # Now we can spin up a docker and unpack that patch into the workdir.
     #TODO Change to desired profile
-    valid, profile = get_desired_profile()
-    if valid:
-        swap_stage(get_arch(), profile , stage_define = 'gentoomuch/builder', upstream = False, patch_to_test = patch_name)
-    else:
-        print("Prep patch: Could not get profile")
-        return False
+    profile = get_desired_profile()
+    
+    swap_stage(get_arch(), profile , stage_define = 'gentoomuch/builder', upstream = False, patch_to_test = patch_name)
     print("PATCHING")
     # We build the cmd_str
     cmd_str += 'mkdir -p ' + temp_sourcedir + ' && '

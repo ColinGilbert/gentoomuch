@@ -207,11 +207,8 @@ elif prime_cmd == patch_str:
         if len(sys.argv) > 3:
             patch_name = sys.argv[3]
             #print(patch_name)
-            valid, profile = get_desired_profile()
-            if valid:
-                try_patch(profile, patch_name)
-            else:
-                exit("Need to have a profile set.")
+            profile = get_desired_profile()
+            try_patch(profile, patch_name)
         else:
             exit("You need to provide a patch name to try.")
     # We save a patch to our config/patches directory
