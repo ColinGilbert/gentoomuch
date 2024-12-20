@@ -84,7 +84,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         cmd_str += 'emerge --usepkg n --root=/mnt/gentoo @module-rebuild && '
     if custom_stage != '':
         cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch/builder && "
-        cmd_str += "emerge --root=/mnt/gentoo " + packages_str + " && "
+        cmd_str += "emerge --root=/mnt/gentoo " + packages_str + " && " # Here we re-emerge in order to install potentially-needed packages removed in the previous command
     if strip_deps:
         cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
     cmd_str += "cd / && "
@@ -95,7 +95,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
     cmd_str += "\""
     if upstream:
-        swap_stage(arch, profile, stage_define =  'gentoomuch/builder', upstream = True)
+        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = True)
     else:
         swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = False, custom_stage = custom_stage)
     code = os.system(cmd_str)

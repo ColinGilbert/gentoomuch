@@ -7,10 +7,7 @@ from .get_desired_profile import get_desired_profile
 from .get_profiles import get_profiles
 
 def list_profiles(arch):
-    valid, desired = get_desired_profile()
-    has_desired_profile = False
-    if valid:
-        has_desired_profile = True
+    desired = get_desired_profile()
     print("Listing compatible system profiles:")
     for p in get_profiles():
         if docker_stage_exists(arch, p, 'gentoomuch/builder', False):
@@ -19,7 +16,7 @@ def list_profiles(arch):
             bootstrapped_indicator = 'UPSTREAM READY '
         else:
             bootstrapped_indicator = 'NOT INSTALLED  '
-        if has_desired_profile and p == desired:
+        if p == desired:
             desired_indicator = '[*]'
         else:
             desired_indicator = '[ ]'

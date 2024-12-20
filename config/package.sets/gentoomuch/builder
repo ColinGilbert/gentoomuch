@@ -5,8 +5,6 @@ app-arch/cpio
 dev-vcs/git
 app-eselect/eselect-repository
 sys-fs/squashfs-tools
-app-editors/vim
 app-portage/gentoolkit
 sys-kernel/linux-firmware
 app-arch/pigz
-sys-kernel/gentoo-sources
