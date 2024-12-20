@@ -273,12 +273,9 @@ elif prime_cmd == pipeline_str:
 ####################
 elif prime_cmd == sync_str:
     if has_sync_happened():
-        valid, profile = get_desired_profile()
-        if valid:
-            swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = False)
-            sync()
-        else:
-            exit("Need to select a profile prior to sync.")
+        profile = get_desired_profile()
+        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = False)
+        sync()
     else:
         exit("Need to bootstrap a profile prior to first sync")
 ################################

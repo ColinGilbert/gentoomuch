@@ -51,6 +51,8 @@ def swap_stage(arch : str, profile : str, stage_define : str, upstream : bool, p
     if 'packages' in combiner.todo:
         if len(combiner.todo['packages']) > 0:
             write_file_lines(desired_packages_path, combiner.todo['packages'])
+        else:
+            write_file_lines(desired_packages_path, [''])
     # if 'hooks' in combiner.todo:
     #     if len(combiner.todo['hooks']) > 0:
     #         write_file_lines(desired_hooks_path, combiner.todo['hooks'])

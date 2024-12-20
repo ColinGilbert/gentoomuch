@@ -41,11 +41,12 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     packages_str = ''
     for p in packages:
         packages_str += p.strip()
-        packages_str += ' '
+        if p.strip() != '':
+            packages_str += ' '
     uid = get_gentoomuch_uid()
     gid = get_gentoomuch_gid()
     jobs = get_gentoomuch_jobs()
-    print('PACKAGES TO INSTALL : ' + packages_str)
+    print('PACKAGES TO INSTALL: ' + packages_str)
     if kconfig:
         print("KCONFIG: " + kconfig)
     cmd_str = "cd " + output_path + " && "
@@ -84,7 +85,9 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         cmd_str += 'emerge --usepkg n --root=/mnt/gentoo @module-rebuild && '
     if custom_stage != '':
         cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch/builder && "
-        cmd_str += "emerge --root=/mnt/gentoo " + packages_str + " && " # Here we re-emerge in order to install potentially-needed packages removed in the previous command
+        cmd_str += "emerge --root=/mnt/gentoo -uDn --with-bdeps=y @world && "
+        if packages_str.strip() != '':
+            cmd_str += "emerge --root=/mnt/gentoo " + packages_str + " && "
     if strip_deps:
         cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
     cmd_str += "cd / && "
@@ -103,5 +106,8 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         print("FAILED TO CREATE TARBALL: " + archive_name)
         return (False,'')
     print("SIGNING STAGE " + archive_name)
-    sign_stage(path = os.path.join(stages_path, archive_name))
+    results = sign_stage(path = os.path.join(stages_path, archive_name))
+    if not results:
+        print("COULD NOT SIGN STAGE")
+        return (False, '')
     return (True, archive_name)
