@@ -26,6 +26,8 @@ from include.prep_kernel_config import prep_kernel_config
 from include.containerize import containerize
 from include.pipeline import pipeline
 from include.update_kernel import update_kernel
+from include.exec_in_chroot import exec_in_chroot
+
 
 # Our commandline keywords
 ls_str          = 'ls'
@@ -54,7 +56,7 @@ test_str        = 'test'
 update_str      = 'update'
 
 # First word after the "gentoomuch" command.
-primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str, )
+primary_commands = (profile_str, stage_str, sync_str, pipeline_str, freshroot_str, bootstrap_str, patch_str, kernel_str, clean_str, test_str)
 # Commands you can use ls and set to visualize and manipulate.
 #ls_and_set_usedwiths = (profile_str, stage_str)
 # 
@@ -286,5 +288,11 @@ elif prime_cmd == clean_str:
     code = os.system("docker system prune -f")
     if code == 0:
         pass
+elif prime_cmd == test_str:
+    result = exec_in_chroot(os.path.join(stages_path, 'TEMP'), "echo HELLO WORLD")
+    if result:
+        print("Exec in chroot: SUCCESS")
+    else:
+        print("Exec in chroot: FAILURE")
 else:
     print_usage()
