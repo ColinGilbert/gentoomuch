@@ -9,7 +9,6 @@ from .get_dockerized_profile_name import get_dockerized_profile_name
 debug				        	= True
 output_path				    	= os.path.join(Path.home(), 'gentoomuch-data')
 stages_path		            	= os.path.join(output_path, 'stages')
-gpg_path				    	= os.path.join(output_path, 'gpg')
 emergelogs_path             	= os.path.join(output_path, 'emerge.logs')
 desired_stage_path		    	= os.path.join(output_path, 'desired_stage')
 desired_profile_path	    	= os.path.join(output_path, 'desired_profile')
@@ -17,6 +16,7 @@ desired_packages_path	    	= os.path.join(output_path, 'desired_packages')
 desired_hooks_path		    	= os.path.join(output_path, 'desired_hooks')
 profiles_path                   = os.path.join(output_path, 'profiles')
 kernels_out_path                = os.path.join(output_path, 'kernels')
+patches_workdir                 = os.path.join(output_path, 'patches.work')
 # Portage-related
 portage_output_path		    	= os.path.join(output_path, 'portage')
 sets_output_path		    	= os.path.join(portage_output_path, 'sets')
@@ -49,4 +49,3 @@ usage_str                       = "    gentoomuch "
 # Patches
 patches_export_mountpoint       = os.path.join('/mnt', 'patches')
 kconfigs_mountpoint             = os.path.join('/mnt', 'kconfigs')
-patches_workdir                 = os.path.join(output_path, 'patches.work')
