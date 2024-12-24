@@ -17,8 +17,9 @@ from .get_gentoomuch_jobs import get_gentoomuch_jobs
 from .package_from_patch import package_from_patch
 from .build_kernel import build_kernel
 from .sign_stage import sign_stage
+from .exec_user_hooks import exec_user_hooks
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', strip_deps: bool = False, friendly_name : str = '', custom_stage: str = ''):
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', strip_deps: bool = False, friendly_name : str = '', custom_stage: str = '', scripts: [str] = [], removes: [str] = []):
     if friendly_name != '':
         archive_name = friendly_name + ".tar.gz"
     else:
@@ -62,6 +63,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "mkdir -p /mnt/gentoo/usr/src && "
     cmd_str += "rm -rf /mnt/gentoo/etc/portage/* && "
     cmd_str += "rsync -aXH /etc/portage/* /mnt/gentoo/etc/portage/ && "
+    cmd_str += "chown -R root:root /mnt/gentoo/etc/portage/ && "
     cmd_str += "echo 'UTC' > /etc/timezone && "
     cmd_str += "echo 'nameserver 8.8.8.8' > /etc/resolv.conf && "
     if not upstream:
@@ -105,9 +107,13 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     if not code == 0:
         print("FAILED TO CREATE TARBALL: " + archive_name)
         return (False,'')
-    print("SIGNING STAGE " + archive_name)
     results = sign_stage(path = os.path.join(stages_path, archive_name))
     if not results:
         print("COULD NOT SIGN STAGE")
         return (False, '')
+    if len(scripts) > 0 or len(removes) > 0:
+        results = exec_user_hooks(os.path.join(stages_path, archive_name), scripts, removes)
+        if results == False:
+            return (False,'')
+    
     return (True, archive_name)

@@ -72,7 +72,6 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     if is_updater:
         results.append(stages_mount_str + ':ro\n')
         results.append('    - ' + squashed_ports_dir + ':' + squashed_ports_mountpoint + '\n')
-
     # Here we loop over the all the files in the portage directory and add them.
     for (dirpath, directories, files) in os.walk(portage_output_path):
         for f in files:

@@ -27,7 +27,7 @@ from include.containerize import containerize
 from include.pipeline import pipeline
 from include.update_kernel import update_kernel
 from include.exec_in_chroot import exec_in_chroot
-
+from include.exec_user_hooks import exec_user_hooks
 
 # Our commandline keywords
 ls_str          = 'ls'
@@ -277,6 +277,11 @@ elif prime_cmd == sync_str:
         sync()
     else:
         exit("Need to bootstrap a profile prior to first sync")
+#
+# Testing
+#
+elif prime_cmd == test_str:
+    print(str(exec_user_hooks(os.path.join(stages_path, 'example-desktop.tar.gz'), scripts = ['example.sh'], removes = ['example'])))
 ################################
 # Clean Gentoomuch environment. 
 ################################
