@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-from .gentoomuch_common import dockerized_username, patches_export_mountpoint, kconfigs_mountpoint
+from .gentoomuch_common import dockerized_username, patches_export_mountpoint, kconfigs_mountpoint, squashed_ports_mountpoint
 from .get_gentoomuch_uid import get_gentoomuch_uid
 from .get_gentoomuch_gid import get_gentoomuch_gid
 
@@ -15,17 +15,13 @@ def create_dockerfile(tarball_name: str, profile: str) -> str:
     results += 'RUN mkdir -p /mnt/stages \\\n'
     results += '&& mkdir -p /mnt/user-data \\\n'
     results += '&& mkdir -p /mnt/gentoo/usr \\\n'
-    #results += '&& mkdir -p /mnt/ccache_portage \\\n'
+    results += '&& mkdir -p ' + squashed_ports_mountpoint + ' \\\n'
     results += '&& mkdir -p ' + kconfigs_mountpoint + ' \\\n'
     results += '&& rm -rf /etc/portage/package.use \\\n'
-    results += '&& groupadd -g 1000 ' + dockerized_username + ' \\\n'
+    results += '&& groupadd -g ' + gid + ' ' + dockerized_username + ' \\\n'
     results += '&& useradd -m -u ' + uid + " -g " + gid + ' -G portage ' + dockerized_username + ' \\\n'
-    #results += '&& mkdir /root/.cache \\\n'
-    #results += '&& chown -R 1000:1000 /home/gentoomuch-user/.cache \\\n'
     results += '&& mkdir -p ' + patches_export_mountpoint +  ' \\\n'
     results += '&& chown -R ' + uid + ':' + gid + ' ' + patches_export_mountpoint + '\n'
-    # results += '&& USER ' + dockerized_username
-    #results += 'WORKDIR /home/' + dockerized_username + '\n'
     results += 'CMD /bin/bash'
 
     return results

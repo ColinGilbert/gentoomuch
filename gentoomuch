@@ -289,7 +289,7 @@ elif prime_cmd == clean_str:
     if code == 0:
         pass
 elif prime_cmd == test_str:
-    result = exec_in_chroot(os.path.join(stages_path, 'TEMP'), "echo HELLO WORLD")
+    result = exec_in_chroot(os.path.join(stages_path, 'TEMP'), "emerge --version")
     if result:
         print("Exec in chroot: SUCCESS")
     else:

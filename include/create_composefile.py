@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os, sys
-from .gentoomuch_common import output_path, config_path, active_image_tag, stages_path, patches_workdir, patches_export_mountpoint, portage_output_path, kernel_configs_path, kconfigs_mountpoint, kernels_out_path
+from .gentoomuch_common import output_path, config_path, active_image_tag, stages_path, patches_workdir, patches_export_mountpoint, portage_output_path, kernel_configs_path, kconfigs_mountpoint, kernels_out_path, squashed_ports_dir, squashed_ports_mountpoint
 from .write_file_lines import write_file_lines
 from .get_active_stage import get_active_stage
 from .tag_parser import tag_parser
@@ -71,6 +71,8 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
             results.append('    - ' + os.path.join('./patches.work', exporting_patch) + ':' + patches_export_mountpoint + '\n')
     if is_updater:
         results.append(stages_mount_str + ':ro\n')
+        results.append('    - ' + squashed_ports_dir + ':' + squashed_ports_mountpoint + '\n')
+
     # Here we loop over the all the files in the portage directory and add them.
     for (dirpath, directories, files) in os.walk(portage_output_path):
         for f in files:

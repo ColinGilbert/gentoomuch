@@ -17,6 +17,9 @@ desired_hooks_path		    	= os.path.join(output_path, 'desired_hooks')
 profiles_path                   = os.path.join(output_path, 'profiles')
 kernels_out_path                = os.path.join(output_path, 'kernels')
 patches_workdir                 = os.path.join(output_path, 'patches.work')
+squashed_ports_dir              = os.path.join(output_path, 'squashed_ports')
+squashed_ports_filepath         = os.path.join(squashed_ports_dir, 'ports.squash')
+squashed_ports_hosts_ro_mount   = os.path.join(output_path, 'squashed_ports_mountpoint')
 # Portage-related
 portage_output_path		    	= os.path.join(output_path, 'portage')
 sets_output_path		    	= os.path.join(portage_output_path, 'sets')
@@ -49,3 +52,5 @@ usage_str                       = "    gentoomuch "
 # Patches
 patches_export_mountpoint       = os.path.join('/mnt', 'patches')
 kconfigs_mountpoint             = os.path.join('/mnt', 'kconfigs')
+squashed_ports_mountpoint        = os.path.join('/mnt', 'squashed_ports')
+squashed_ports_mounted_filepath = os.path.join(squashed_ports_mountpoint, 'ports.squash')
