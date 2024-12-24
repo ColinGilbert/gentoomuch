@@ -100,7 +100,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
     cmd_str += "cd /mnt/gentoo && "
     cmd_str += "echo 'SAVING STAGE INTO TAR ARCHIVE' && "
-    cmd_str += "tar --exclude='./usr/src/*' -cf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls  && "
+    cmd_str += "tar --exclude='./usr/src/*' --exclude='./dev/*' -cf /mnt/stages/" + archive_name + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls  && "
     cmd_str += "chown " + uid + ":" + gid + " /mnt/stages/" + archive_name
     cmd_str += "\""
     code = os.system(cmd_str)

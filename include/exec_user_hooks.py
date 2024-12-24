@@ -47,7 +47,7 @@ def exec_user_hooks(stage_path: str, scripts: [str], removes: [str]):
             # if code == 0:
             #     pass
             return False
-    code = os.system('rm -rf ' + stage_path + ' && cd ' + chroot_workdir + ' && tar cpf ' + stage_path + ' . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls')
+    code = os.system('rm -rf ' + stage_path + ' && cd ' + chroot_workdir + " && tar --exclude='./dev/*' -cf " + stage_path + " . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls")
     if code == 0:
         pass
     code = os.system('sudo rm -rf ' + chroot_workdir)
