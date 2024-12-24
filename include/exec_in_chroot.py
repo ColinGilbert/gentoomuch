@@ -12,7 +12,7 @@ def exec_in_chroot(path: str, command: str):
     cmd_str += 'sudo mount --make-rslave ' + os.path.join(path, 'tmp') + ' && '
     cmd_str += 'sudo mount --bind /run ' + os.path.join(path, 'run') + ' && '
     cmd_str += 'sudo mkdir -p ' + os.path.join(path, 'var/db/repos/gentoo') + ' && '
-    cmd_str += 'sudo mount -o loop ' + squashed_ports_filepath + ' ' + os.path.join(path, 'var/db/repos/gentoo') + ' && '
+    cmd_str += 'sudo mount -o loop,ro ' + squashed_ports_filepath + ' ' + os.path.join(path, 'var/db/repos/gentoo') + ' && '
     cmd_str += 'sudo echo nameserver 8.8.8.8 > ' + os.path.join(path, 'etc', 'resolv.conf') + ' && '
     cmd_str += 'sudo chroot ' + path + ' /bin/bash -c " . /etc/profile && '   + command + '"'
 
