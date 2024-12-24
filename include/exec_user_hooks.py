@@ -4,7 +4,7 @@ from .gentoomuch_common import user_scripts_path, user_removes_path, chroot_work
 from .sign_stage import sign_stage
 
 def exec_user_hooks(stage_path: str, scripts: [str], removes: [str]):
-    code = os.system('mkdir -p ' + chroot_workdir + ' && tar xpf ' + stage_path + ' -C ' + chroot_workdir)
+    code = os.system('mkdir -p ' + chroot_workdir + ' && rm -rf ' + os.path.join(chroot_workdir, '*') + ' && tar xpf ' + stage_path + ' -C ' + chroot_workdir)
     if code == 0:
         pass
     if len(scripts) > 0:
@@ -47,12 +47,11 @@ def exec_user_hooks(stage_path: str, scripts: [str], removes: [str]):
             # if code == 0:
             #     pass
             return False
-    # Remove the temporary directory and call it a day
     code = os.system('rm -rf ' + stage_path + ' && cd ' + chroot_workdir + ' && tar cpf ' + stage_path + ' . --use-compress-program=pigz --xattrs --selinux --numeric-owner --acls')
     if code == 0:
         pass
-    results = sign_stage(stage_path)
-    #code = os.system('sudo rm -rf ' + chroot_workdir)
+    code = os.system('sudo rm -rf ' + chroot_workdir)
     if code == 0:
         pass
+    results = sign_stage(stage_path)
     return results
