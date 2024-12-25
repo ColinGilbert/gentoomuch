@@ -41,7 +41,7 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     is_updater              = bool(container_type_str == updater_str)
     is_patcher              = bool(container_type_str == patcher_str)
     # Our results will be a list of strings.
-    results = [] 
+    results = []
     # First, we define whether this'll be a builder or a packer.
     results.append('  gentoomuch-' + container_type_str + ':\n')
     # We append the universal parts.
@@ -52,6 +52,8 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     results.append('    - backend\n')
     results.append('    tmpfs:\n')
     results.append('    - /mnt/gentoo\n')
+    results.append('    - /tmp\n')
+    results.append('    - /var/tmp\n')
     results.append('    volumes:\n')
     results.append('    - /dev:/dev\n')
     results.append('    - /proc:/proc\n')
