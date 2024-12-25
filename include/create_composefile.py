@@ -53,7 +53,7 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     results.append('    tmpfs:\n')
     results.append('    - /mnt/gentoo\n')
     results.append('    - /tmp\n')
-    results.append('    - /var/tmp\n')
+    results.append('    - /var/tmp:exec\n')
     results.append('    volumes:\n')
     results.append('    - /dev:/dev\n')
     results.append('    - /proc:/proc\n')

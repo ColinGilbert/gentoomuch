@@ -17,7 +17,6 @@ from include.get_desired_stage import get_desired_stage
 from include.get_desired_profile import get_desired_profile
 from include.get_docker_tag import get_docker_tag
 from include.save_tarball import save_tarball
-from include.load_upstream_tarball import load_upstream_tarball
 from include.patches import prep_patch, try_patch, save_patch
 from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
 from include.get_profiles import get_profiles
@@ -173,7 +172,7 @@ elif prime_cmd == bootstrap_str:
     if code:
       pass
     path = os.path.join(os.getcwd(), sys.argv[3])
-    code = load_upstream_tarball(arch, profile, path)
+    code = containerize(path, arch, profile, stage_define = '', upstream = True)
     if not code:
         exit("Failed to load tarball")
     if not has_sync_happened():
