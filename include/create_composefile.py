@@ -29,8 +29,6 @@ def create_composefile(output_path : str, exporting_patch : str = ''):
     lines.append('    driver: local\n')
     lines.append('  binpkgs:\n')
     lines.append('    driver: local\n')
-    lines.append('  gentoo_root_tmp:\n')
-    lines.append('    driver: local\n')
     lines.append('  kernel_src:\n')
     lines.append('    driver: local\n')
     write_file_lines(os.path.join(output_path, 'docker-compose.yml'), lines)
@@ -52,6 +50,8 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     results.append('    command: /bin/bash\n')
     results.append('    networks:\n')
     results.append('    - backend\n')
+    results.append('    tmpfs:\n')
+    results.append('    - /mnt/gentoo\n')
     results.append('    volumes:\n')
     results.append('    - /dev:/dev\n')
     results.append('    - /proc:/proc\n')
@@ -60,7 +60,6 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     results.append('    - distfiles:/var/cache/distfiles\n')
     results.append('    - repos:/var/db/repos\n')
     results.append('    - kernel_src:/usr/src\n')
-    results.append('    - gentoo_root_tmp:/mnt/gentoo\n')
     results.append('    - ' + kernel_configs_path + ':' + kconfigs_mountpoint + '\n')
     # These are parts that have different permissions between the types of containers.
     stages_mount_str    = '    - ./stages:/mnt/stages'    

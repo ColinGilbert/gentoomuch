@@ -80,6 +80,8 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                 else:
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --onlydeps =" + package + " && "
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --usepkg n =" + package + " && "
+                cmd_str += 'emerge --root=/mnt/gentoo -j' + jobs + ' --unmerge =' + package + ' && '
+                cmd_str += "emerge --root=/mnt/gentoo -uDn --with-bdeps=y @world && "
     if kconfig:
         cmd_str += "echo 'MAKING " + kconfig + "' && "
         cmd_str += "cp " + os.path.join(kconfigs_mountpoint, kconfig + ".kconf") + " /usr/src/linux/.config && "

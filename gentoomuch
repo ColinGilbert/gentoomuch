@@ -233,6 +233,8 @@ elif prime_cmd == patch_str:
                results = containerize(os.path.join(stages_path, name), arch, profile, stage_define = 'gentoomuch/builder', upstream = False)
                if not results:
                 exit("GENTOOMUCH: Failed to containerize patched stage")
+            else:
+                exit("GENTOOMUCH: Failed to save patched stage tarball")
             #TODO: Add the rest in the pipeline
     else:
         print_usage_patch()
