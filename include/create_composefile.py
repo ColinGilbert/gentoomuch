@@ -78,6 +78,6 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
         for f in files:
             if not f[0] == '.' and not f == 'README.md':
                 rel_path = os.path.relpath(dirpath, output_path)
-                results.append('    - ./' + os.path.join(rel_path, f) + ':' + os.path.join('/etc/', rel_path, f) + ':ro\n')
+                results.append('    - ./' + os.path.join(rel_path, f) + ':' + os.path.join('/etc/', rel_path, f) + '\n')
     # Finally, we return the list of string.
     return results

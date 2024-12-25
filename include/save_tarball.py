@@ -19,7 +19,7 @@ from .build_kernel import build_kernel
 from .sign_stage import sign_stage
 from .exec_user_hooks import exec_user_hooks
 
-def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', strip_deps: bool = False, friendly_name : str = '', custom_stage: str = '', scripts: [str] = [], removes: [str] = []):
+def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', friendly_name : str = '', custom_stage: str = '', scripts: [str] = [], removes: [str] = []):
     if friendly_name != '':
         archive_name = friendly_name + ".tar.gz"
     else:
@@ -70,18 +70,29 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         cmd_str += "ln -s /usr/src /mnt/gentoo/usr/src && "
     if upstream:
         cmd_str += "emerge --root=/ pigz && "
-    cmd_str += "emerge --with-bdeps=y --root=/mnt/gentoo -j" + jobs + (" --emptytree gentoo-sources " if upstream else " -uD --changed-use --newuse ") + packages_str + " @world && "
+    cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + (" --emptytree gentoo-sources " if upstream else " -uD --changed-use --newuse ") + packages_str + " @world && "
+    cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
+    patch_counter = 0
     for patch in patches:
         if patch != '':
+            patch_counter += 1
             valid, package = package_from_patch(patch, False)
             if valid:
                 if patches_have_been_compiled:
-                    cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --oneshot =" + package + " && "
+                    cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot =" + package + " && "
                 else:
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --onlydeps =" + package + " && "
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --usepkg n =" + package + " && "
-                cmd_str += 'emerge --root=/mnt/gentoo -j' + jobs + ' --unmerge =' + package + ' && '
-                cmd_str += "emerge --root=/mnt/gentoo -uDn --with-bdeps=y @world && "
+                # cmd_str += 'emerge --root=/mnt/gentoo -j' + jobs + ' --unmerge =' + package + ' && '
+                # cmd_str += "emerge --root=/mnt/gentoo -uDn --with-bdeps=y @world && "
+    if patch_counter > 0:
+        cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
+    if custom_stage != '':
+        cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch/builder && "
+        cmd_str += "emerge --root=/mnt/gentoo -uDn --with-bdeps=y @world && "
+        if packages_str.strip() != '':
+            cmd_str += "emerge --root=/mnt/gentoo " + packages_str + " && "    
+        cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
     if kconfig:
         cmd_str += "echo 'MAKING " + kconfig + "' && "
         cmd_str += "cp " + os.path.join(kconfigs_mountpoint, kconfig + ".kconf") + " /usr/src/linux/.config && "
@@ -91,13 +102,6 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         cmd_str += "INSTALL_MOD_PATH=/mnt/gentoo make modules_install && "
         cmd_str += 'emerge --onlydeps --root=/mnt/gentoo @module-rebuild && '
         cmd_str += 'emerge --usepkg n --root=/mnt/gentoo @module-rebuild && '
-    if custom_stage != '':
-        cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch/builder && "
-        cmd_str += "emerge --root=/mnt/gentoo -uDn --with-bdeps=y @world && "
-        if packages_str.strip() != '':
-            cmd_str += "emerge --root=/mnt/gentoo " + packages_str + " && "
-    if strip_deps:
-        cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
     cmd_str += "cd / && "
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
     cmd_str += "cd /mnt/gentoo && "

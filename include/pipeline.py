@@ -50,8 +50,7 @@ def pipeline(arch: str):
         if os.path.isdir(p):
             patches.append(p)
     for (kconfig, stage4_name, profile, stage3_name, scripts, removes) in stage4_list:
-        #def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', strip_deps = bool: False, friendly_name : str = ''):
-        (valid, archive_name) = save_tarball(arch, profile, stage_define = stage3_name, upstream = False, patches = patches, patches_have_been_compiled = True, kconfig = kconf, strip_deps = True, friendly_name = stage4_name, custom_stage = stage3_name, scripts = scripts, removes = removes)
+        (valid, archive_name) = save_tarball(arch, profile, stage_define = stage3_name, upstream = False, patches = patches, patches_have_been_compiled = True, kconfig = kconf, friendly_name = stage4_name, custom_stage = stage3_name, scripts = scripts, removes = removes)
         if not valid:
             print("PIPELINE BROKEN TRYING TO SAVE: " + stage4_name)
             return False
