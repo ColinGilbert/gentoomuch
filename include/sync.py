@@ -7,7 +7,7 @@ from .get_gentoomuch_uid import get_gentoomuch_uid
 from .get_gentoomuch_gid import get_gentoomuch_gid
 
 def sync():
-    print("GENTOOMUCH: Syncing Portage...")
+    print("GENTOOMUCH: Syncing Portage. This may take some time...")
     cmd_str = 'emerge -v --sync && '
     cmd_str += 'emerge --oneshot squashfs-tools && '
     cmd_str += 'rm -f ' + squashed_ports_mounted_filepath + ' && '
