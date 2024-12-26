@@ -1,5 +1,5 @@
-Gentoomuch: Because something like this was bound to happen...
-==============================================================
+Gentoomuch: Immutable, repeatable Gentoo
+========================================
 
 Intro:
 ------
@@ -50,6 +50,8 @@ Installation:
 - (Optional) Create a ``gentoomuch-data`` directory in your home directory and set it to mount tmpfs.
 - Run ``gentoomuch init``
 - Run ``gpg --keyserver hkps://keys.gentoo.org --recv-keys 13EBBDBEDE7A12775DFDB1BABB572E0E2D182910`` to get the Gentoo stage3 signing key.
+- Create a CPU definition in ``~/gentoomuch-config/cpu.defines``
+- Edit ``~/gentoomuch-config/stage3-defines/gentoomuch/builder/cpu`` to point to that CPU definition.
 - Download a stage3 of your architecture and its .asc signature from upstream and run ``gentoomuch bootstrap <profile-name> stage3-*.tar.xz`` and wait for the first emerge.
 - Once it's done, you should be good to go!
 
