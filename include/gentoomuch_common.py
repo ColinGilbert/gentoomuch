@@ -26,7 +26,7 @@ portage_output_path		    	= os.path.join(output_path, 'portage')
 sets_output_path		    	= os.path.join(portage_output_path, 'sets')
 patches_output_path             = os.path.join(portage_output_path, 'patches')
 # Config defines
-config_path				    	= os.path.join(Path.home(),'gentoomuch', 'config')
+config_path				    	= os.path.join(Path.home(),'gentoomuch-config')
 global_config_path		    	= os.path.join(config_path, 'portage.global')
 stage3_defines_path		    	= os.path.join(config_path, 'stage3.defines')
 stage4_defines_path		    	= os.path.join(config_path, 'stage4.defines')

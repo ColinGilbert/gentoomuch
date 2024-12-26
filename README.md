@@ -45,11 +45,11 @@ Prerequisites:
 Installation:
 -------------
 
-- Clone this repository. Append it to your PATH variable
-- Clone the gentoomuch-config repository to your home directory.
-- (Optional) Create a ``gentoomuch-data`` directory in your home directory and set it to mount tmpfs
+- Clone this repository. Append it to your PATH variable.
+- Clone the [gentoomuch-config repository](https://github.com/ColinGilbert/gentoomuch-config) to your home directory.
+- (Optional) Create a ``gentoomuch-data`` directory in your home directory and set it to mount tmpfs.
 - Run ``gentoomuch init``
-- Run ``gentoomuch sync``
+- Run ``gpg --keyserver hkps://keys.gentoo.org --recv-keys 13EBBDBEDE7A12775DFDB1BABB572E0E2D182910`` to get the Gentoo stage3 signing key.
 - Download a stage3 of your architecture and its .asc signature from upstream and run ``gentoomuch bootstrap <profile-name> stage3-*.tar.xz`` and wait for the first emerge.
 - Once it's done, you should be good to go!
 

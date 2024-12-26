@@ -1,9 +1,0 @@
-sys-devel/distcc
-dev-util/ccache
-dev-build/cmake
-dev-vcs/git
-app-eselect/eselect-repository
-sys-fs/squashfs-tools
-app-portage/gentoolkit
-sys-kernel/linux-firmware
-app-arch/pigz

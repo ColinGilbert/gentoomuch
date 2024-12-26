@@ -1,1 +1,0 @@
-This is where you define named sets of files and directories you wish to remove from the final stage. These are completely optional.

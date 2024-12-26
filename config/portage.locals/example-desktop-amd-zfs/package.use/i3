@@ -1,8 +1,0 @@
-x11-wm/i3 -doc
->=x11-libs/cairo-1.18.2-r1 X
-# required by x11-wm/i3-4.23::gentoo
-# required by x11-wm/i3 (argument)
->=x11-libs/libxkbcommon-1.7.0-r1 X
-# required by x11-wm/i3-4.23::gentoo
-# required by x11-wm/i3 (argument)
->=x11-libs/pango-1.52.2 X
