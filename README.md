@@ -35,6 +35,32 @@ Nothing ever comes completely cost-free - If you are an existing (ie: skeptical)
 - For some silly reason, gentoo-sources gets re-emerged on every pipeline invocation. I consider this a bug to be fixed and welcome any input from the community as to why this keeps happening.
 - Patches are limited to a single version of a package. This is because patches should be one-offs. If you want something more permanent, you should create an ebuild.
 
+Usage notes:
+------------
+
+Your configuration lives in the ``~/gentoomuch-config`` directory.
+A configuration called "gentoomuch/builder" exists. Modify it when you need to; I made the decision to expose every possible configuration to the end-user. 
+Further documentation is in the config directory. These aforementioned folders are intended to be both part of our pipeline and as living, implicitly-tested documentation for anyone looking to get started.
+
+CLI Reference:
+--------------
+
+- ``gentoomuch init``: Initializes the ``~/gentoomuch-data`` directory. If tmpfs is mounted to it, then you need to run this command every boot. 
+- ``gentoomuch freshroot``: Drops you into a builder environment. Here, you can test out different use-flags for emerging, etc.
+- ``gentoomuch pipeline``: Runs the pipeline. It'll build all stage4s defined in ``~/gentoomuch-config``.
+- ``gentoomuch sync``: Runs emerge --sync.
+- ``gentoomuch bootstrap <profile.name> <tarball.filename>``: Bootstraps a builder from an upstream stage3, for a given profile.
+- ``gentoomuch profile ls``: Lists the profiles you've bootstrapped.
+- ``gentoomuch profile set <profile.name>``: Sets the profile that'll be used when calling ``freshroot``
+- ``gentoomuch stage build <stage4.definition>``: Builds a stage4 that you've defined. This is to 
+- ``gentoomuch kernel prep <kernel.config>``: Prepares a given kernel config and drops you into ``make nconfig``. If the configuration doesn't exist, Gentoomuch creates a new one. 
+- ``gentoomuch kernel update`: Deletes all downloaded kernel source files and re-download fresh ones.
+- ``gentoomuch patch prep  <patch.name> <package.name> <version-str>``: Sets up a patch directory in ``~/gentoomuch-data/patches.work/patch.name``. You then modify the files within it according to your needs.
+- ``gentoomuch patch try <patch.name>``: Tries to compile the patch in your patches working directory.
+- ``gentoomuch patch save <patch.name>``: Saves a patch to your ``~/gentoomuch-config/user.patches`` directory.
+- ``gentoomuch patch compile``: Compiles all patches.
+- ``gentoomuch clean``: Cleans up temporary files.
+
 Prerequisites:
 --------------
 
@@ -57,13 +83,6 @@ Installation:
 
 
 I will be creating packages for Gentoo and possibly Ubuntu in the near future.
-
-Usage notes:
-------------
-
-Your configuration lives in the ``~/gentoomuch-config`` directory.
-A configuration called "gentoomuch/builder" exists. Modify it when you need to; I made the decision to expose every possible configuration to the end-user. 
-Further documentation is in the config directory. These aforementioned folders are intended to be both part of our pipeline and as living, implicitly-tested documentation for anyone looking to get started.
 
 Roadmap:
 --------

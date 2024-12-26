@@ -101,6 +101,7 @@ def print_usage():
     print_usage_profile()
     print_usage_stage()
     print_usage_kernel()
+    print_usage_patch()
     print(usage_str + clean_str)
 
 # We do this every time!
