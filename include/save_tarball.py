@@ -83,8 +83,6 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                 else:
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --onlydeps =" + package + " && "
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --usepkg n =" + package + " && "
-                # cmd_str += 'emerge --root=/mnt/gentoo -j' + jobs + ' --unmerge =' + package + ' && '
-                # cmd_str += "emerge --root=/mnt/gentoo -uDn --with-bdeps=y @world && "
     if patch_counter > 0:
         cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
     if custom_stage != '':

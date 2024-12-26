@@ -13,7 +13,7 @@ from .apply_saved_patches import apply_saved_patches
 
 def swap_stage(arch : str, profile : str, stage_define : str, upstream : bool, patch_to_test: str = '', custom_stage = ''):
     print("SWAPPING STAGE")
-    os.system('cd ' + output_path + ' && docker-compose down')
+    os.system('cd ' + output_path + ' && docker-compose down > /dev/null 2>&1')
     # We assemble our (temporary) Portage directory from stages.
     code = os.system('rm -rf ' + portage_output_path + "/*")
     if code == 0:
@@ -60,6 +60,6 @@ def swap_stage(arch : str, profile : str, stage_define : str, upstream : bool, p
     results = create_composefile(output_path, patch_to_test)
     if results:
         pass
-    code = os.system('cd ' + output_path + ' && docker-compose up --quiet-pull --no-start')
+    code = os.system('cd ' + output_path + ' && docker-compose up --quiet-pull --no-start > /dev/null 2>&1')
     if code == 0:
         pass

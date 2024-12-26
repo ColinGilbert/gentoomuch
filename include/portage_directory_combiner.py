@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, os 
-from .gentoomuch_common import portage_output_path, config_path, stage3_defines_path, cpu_path, pkgset_path, local_config_basepath, hooks_path, global_config_path, debug, sets_output_path
+from .gentoomuch_common import portage_output_path, config_path, stage3_defines_path, cpu_path, pkgset_path, local_config_basepath, hooks_path, global_config_path, sets_output_path
 from .read_file_lines import read_file_lines
 from .write_file_lines import write_file_lines
 from .portage_directory import portage_directory
@@ -13,12 +13,12 @@ class portage_directory_combiner:
     def __init__(self):
         self.todo = dict() # Dict[str, List[str]]
         self.accum = portage_directory()
-        self.msg_prefix = 'portage_stage_combiner::'
+        self.msg_prefix = 'PORTAGE DIRECTORY COMBINER: '
 
     def process_stage_defines(self, current_stage):
         msg_prefix = self.msg_prefix + 'process_stage_defines() - '
         current_stage = current_stage.strip()
-        print("PORTAGE DIRECTORY COMBINER: CURRENT STAGE: " + current_stage)
+        #print("PORTAGE DIRECTORY COMBINER: CURRENT STAGE: " + current_stage)
         # First, we ensure our target output directory is sane.
         self.__prep()
         # Determine whether the stage defines path exists.
@@ -39,7 +39,7 @@ class portage_directory_combiner:
         # Now, we can pull in the globally-needed parts.
         self.__checkout_common_config()
         # We need to get to the file in which local portage directories are written. 
-        flags_defines_path = os.path.join(current_stage3_defines_path, 'flags')
+        flags_defines_path = os.path.join(current_stage3_defines_path, 'portage.local')
         if os.path.isfile(flags_defines_path):
             flags_conf = read_file_lines(flags_defines_path)
         else:
@@ -51,7 +51,7 @@ class portage_directory_combiner:
             if not os.path.isdir(combined_path):
                 sys.exit(msg_prefix + 'Local portage flags config directory ' + combined_path + ' does not exist.')
             # Now ingest.
-            print(msg_prefix + "Ingesting " + combined_path)
+            # print(msg_prefix + "Ingesting " + combined_path)
             self.accum.ingest(combined_path)
         # We add info we must use post-munge.
         combined_path = os.path.join(current_stage3_defines_path, 'packages')
@@ -68,8 +68,6 @@ class portage_directory_combiner:
 
     def __prep(self):
         msg_prefix = self.msg_prefix + '__prep() - '
-        if debug:
-            print(msg_prefix + 'Prepping munged portagedir environment.')
         if not os.path.isdir(portage_output_path):
             os.mkdir(portage_output_path)
         code = os.system('rm -rf ' + os.path.join(portage_output_path, '*'))
