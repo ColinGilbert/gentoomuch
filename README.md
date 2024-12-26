@@ -6,7 +6,7 @@ Intro:
 
 I absolutely fell in love with Gentoo Linux several years ago. It is an amazing meta-distribution backed by a vibrant all-volunteer group of developers and maintainers who operate mostly by consensus. You can readily optimize a Gentoo system to obtain the best performance, reliability, and compatibility possible. The significant advantage of a tailored operating system is that things remain in harmony. However, unless carefully managed, a source-based distribution such as Gentoo is guaranteed to suffer from configuration drift as patches and hacks accumulate. This tool provides automations to enable such careful management. Using Gentoomuch allows any user to be brave... If you use source control on the config directory, then congratulations: your builds are now reproducible. Gentoo and DevOps are coming closer together. This tool's purpose is to create custom Gentoo-based stage4 tarballs. It was made with immutable machines in mind.
 
-Gentoomuch allows Gentoo users to reversibly experiment with unknown use-flag combinations and easily create patches for broken packages. Gentoomuch allows long-time developers another means to orchestrate their build processes. It gives Gentoo sysadmins a modern way to reduce technical debt. It gives cloud engineers the option of using highly-optimized, immutable Gentoo for their virtualized servers. Using this tool is a rather civilized way of managing multiple Gentoo installations; it has very good amenities.
+Gentoomuch allows Gentoo users to reversibly experiment with unknown use-flag combinations and easily create patches for broken packages. Gentoomuch allows long-time developers another means to orchestrate their build processes. It gives Gentoo sysadmins a modern way to reduce technical debt. It gives cloud engineers the option of using highly-optimized, immutable Gentoo for their virtualized servers. Using this tool is a rather civilized way of managing multiple Gentoo installations; it has very good amenities. It was made to be played with.
 
 Gentoomuch allows you manage an entire network's worth of Gentoo systems without fuss, while still being fun to use!
 
@@ -17,8 +17,6 @@ Gentoomuch aims to to dovetail into the existing ecosystem by being very careful
 Gentoomuch supports the important use-case of prepping and using patches when a package breaks. Gentoomuch does all the unpacking and diffing and file copying for you. That way, you can have a working system until upstream gets its act together! ;) Pro tip: If you want them to fix the problem, report the issue on Bugzilla and send them the patch once you know it works...
 
 I think this code generally represents best practices for juggling multiple systems in everyone's favourite meta-distribution. Nothing is ever perfect and since upstream is a moving target, there will always be something to do. Not to mention that you can always find a list of best practices with conflicting advice: Choices were made. However, this toolkit is solid: Even when this thing was only half-built, working with Portage was already a saner experience for me than it had ever been beforehand. I hope you find Gentoomuch useful, too.
-
-Gentoomuch was made to be played with.
 
 What's the catch?
 -----------------
