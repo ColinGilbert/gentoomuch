@@ -35,6 +35,9 @@ Nothing ever comes completely cost-free - If you are an existing (ie: skeptical)
 - Bootstrapping dockerized images, epsecially for the first time, can take a while. This is because we do emerge --emptytree with ROOT=/mnt/gentoo which makes Portage re-emerge each package twice, once for / and once for /mnt/gentoo. This is a possible bug in emerge and I'll be talking to upstream about that.
 - For some silly reason, gentoo-sources gets re-emerged on every pipeline invocation. I consider this a bug to be fixed and welcome any input from the community as to why this keeps happening.
 - Patches are limited to a single version of a package. This is because patches should be one-offs. If you want something more permanent, you should create an ebuild.
-- You need that have installed sudo, pigz, tar, rsync, docker-python, git-python, and docker-compose.
+- You need that have installed sudo, python, gpg, pigz, tar, rsync, docker-python, git-python, docker, and docker-compose.
 
 I think this code generally represents best practices for maintaining multiple systems in everyone's favourite meta-distribution. Nothing is ever perfect and since upstream is a moving target, there will always be something to do. Not to mention that you can always find a list of best practices with conflicting advice: Choices were made. However, this toolkit is solid: Even when this thing was only half-built, working with Portage was already a saner experience for me than it had ever been beforehand. I hope you find Gentoomuch useful, too.
+
+Installation:
+

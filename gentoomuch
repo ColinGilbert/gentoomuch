@@ -133,6 +133,9 @@ if prime_cmd == init_str:
 # Stage definitions-related commands (ls/set).
 ##############################################
 elif prime_cmd == stage_str:
+    if len(sys.argv) == 2:
+        print_usage_stage()
+        exit()
     if sys.argv[2] == ls_str and len(sys.argv) == 3: # Listing stages
         list_stages()
         exit()
@@ -159,6 +162,9 @@ elif prime_cmd == stage_str:
 # Profile-related command (ls/set).
 ###################################
 elif prime_cmd == profile_str:
+    if len(sys.argv) == 2:
+        print_usage_profile()
+        exit()
     if sys.argv[2] == ls_str and len(sys.argv) == 3: # Listing profiles
         list_profiles(arch)
         exit()
@@ -213,6 +219,7 @@ elif prime_cmd == patch_str:
     error_str = usage_str
     if len(sys.argv) == 2:
         print_usage_patch()
+        exit()
     if len(sys.argv) > 2 and sys.argv[2] == prep_str:
         ui_patch_prep_handler(3).handle()
     elif len(sys.argv) > 2 and sys.argv[2] == try_str:

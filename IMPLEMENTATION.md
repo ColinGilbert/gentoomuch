@@ -1,7 +1,0 @@
-- Docker-Compose is a key dependency of this workbench and does much heavy lifting.
-- An object of type `munger` is used to collect the data for each file. It uses the filenames to differentiate between the syntaxes and reads them accordingly. It can then spit out the generated file.
-- An object of type `portage_directory` is used to hold the munger objects for a portage directory
-- An object of type `portage_directory_combiner` is used to assemble multiple portage config subdirectories in `./config`. It uses a file found in in `./config/stage3.defines` to find the correct subdirs and munges them in.
-- A script called `pipeline` runs all the builds in ``./config/build.list`
-- A script called `sync` starts a root and syncs portage via `emerge --sync`. Note: Unless you maintain a local rsync mirror for Portage, it is recommended to run this script sparingly and to refrain from using `emerge --sync` in your own shells. Otherwise, the upstream servers will block you.
-- A script called `freshroot` allows the user to start a root from the currently-active stage3 (the one labeled as gentoomuch/stage3:latest)

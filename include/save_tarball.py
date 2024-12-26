@@ -66,8 +66,17 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     cmd_str += "chown -R root:root /mnt/gentoo/etc/portage/ && "
     cmd_str += "echo 'UTC' > /etc/timezone && "
     cmd_str += "echo 'nameserver 8.8.8.8' > /etc/resolv.conf && "
-    if not upstream:
-        cmd_str += "ln -s /usr/src /mnt/gentoo/usr/src && "
+    if kconfig and not upstream:
+        cmd_str += "cp " + os.path.join(kconfigs_mountpoint, kconfig + ".kconf") + " /usr/src/linux/.config && "
+        cmd_str += "mkdir -p /mnt/gentoo/usr/src && "
+        cmd_str += "ln -s /usr/src/linux /mnt/gentoo/usr/src/linux && "
+#        cmd_str += "cp " + os.path.join(kconfigs_mountpoint, kconfig + ".kconf") + " /mnt/gentoo/usr/src/linux/.config && "
+        cmd_str += "echo 'MAKING " + kconfig + "' && "
+        cmd_str += "cd /usr/src/linux && "
+        cmd_str += "make -j" + jobs + " && "
+        cmd_str += "INSTALL_PATH=/mnt/gentoo/boot make install && "
+        cmd_str += "INSTALL_MOD_PATH=/mnt/gentoo make modules_install && "
+        cmd_str += "touch /usr/src/linux/Module.symvers && " # Hack to compile zfs-kmod
     if upstream:
         cmd_str += "emerge --root=/ pigz && "
     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + (" --emptytree gentoo-sources " if upstream else " -uD --changed-use --newuse ") + packages_str + " @world && "
@@ -83,23 +92,16 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
                 else:
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --onlydeps =" + package + " && "
                     cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --usepkg n =" + package + " && "
+    if kconfig and not upstream:
+        cmd_str += 'emerge --root=/mnt/gentoo --onlydeps @module-rebuild && '
+        cmd_str += 'emerge --root=/mnt/gentoo --usepkg n @module-rebuild && '
     if patch_counter > 0:
         cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
     if custom_stage != '':
         cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch/builder && "
-        cmd_str += "emerge --root=/mnt/gentoo -uDn --with-bdeps=y @world && "
         if packages_str.strip() != '':
             cmd_str += "emerge --root=/mnt/gentoo " + packages_str + " && "    
         cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
-    if kconfig:
-        cmd_str += "echo 'MAKING " + kconfig + "' && "
-        cmd_str += "cp " + os.path.join(kconfigs_mountpoint, kconfig + ".kconf") + " /usr/src/linux/.config && "
-        cmd_str += "cd /usr/src/linux && "
-        cmd_str += "make -j" + jobs + " && "
-        cmd_str += "INSTALL_PATH=/mnt/gentoo/boot make install && "
-        cmd_str += "INSTALL_MOD_PATH=/mnt/gentoo make modules_install && "
-        cmd_str += 'emerge --onlydeps --root=/mnt/gentoo @module-rebuild && '
-        cmd_str += 'emerge --usepkg n --root=/mnt/gentoo @module-rebuild && '
     cmd_str += "cd / && "
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
     cmd_str += "cd /mnt/gentoo && "
