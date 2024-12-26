@@ -9,8 +9,6 @@ from include.sync import sync, has_sync_happened, set_sync_happened
 from include.swap_stage import swap_stage
 from include.create_composefile import create_composefile
 from include.tag_parser import tag_parser
-from include.get_active_stage import get_active_stage
-from include.list_stages import list_stages
 from include.list_profiles import list_profiles
 from include.set_desired_stage import set_desired_stage
 from include.set_desired_profile import set_desired_profile
@@ -29,6 +27,7 @@ from include.update_kernel import update_kernel
 from include.exec_in_chroot import exec_in_chroot
 from include.exec_user_hooks import exec_user_hooks
 from include.compile_patches import compile_patches
+from include.build_stage4 import build_stage4
 
 # Our commandline keywords
 init_str        = 'init'
@@ -70,10 +69,7 @@ def print_usage_init():
     print(usage_str + init_str)
 
 def print_usage_stage():
-    print(usage_str + stage_str + ' ' + ls_str)
-    print(usage_str + stage_str + ' ' + set_str + ' <stage.definition>')
-    print(usage_str + stage_str + ' ' + build_str + ' <profile.name> <stage.definition>')
-    print(usage_str + stage_str + ' ' + build_str + ' <profile.name> <stage.definition> <kernel.config>')
+    print(usage_str + stage_str + ' ' + build_str + ' <stage4.definition>')
 
 def print_usage_kernel():
     print(usage_str + kernel_str + ' ' + prep_str + ' <kernel.config>')
@@ -130,29 +126,11 @@ if len(sys.argv) > 1:
 if prime_cmd == init_str:
     init()
 ##############################################
-# Stage definitions-related commands (ls/set).
+# Stage related commands (building).
 ##############################################
 elif prime_cmd == stage_str:
-    if len(sys.argv) == 2:
-        print_usage_stage()
-        exit()
-    if sys.argv[2] == ls_str and len(sys.argv) == 3: # Listing stages
-        list_stages()
-        exit()
-    elif sys.argv[2] == set_str and len(sys.argv) == 4: # Setting stage
-        if not sys.argv[3].isnumeric():
-            set_desired_stage(sys.argv[3])
-        else:
-            print("You need to set a stage by name, as numbers will change over time.")
-        exit()
-    elif sys.argv[2] == build_str and len(sys.argv) == 5: # Building stage 3
-        valid, archive_name =  save_tarball(arch, profile = sys.argv[3], stage_define = sys.argv[4], upstream = False)
-        if valid:
-            print("SAVED STAGE3 " + archive_name)
-    elif sys.argv[2] == build_str and len(sys.argv) == 6: # Building stage 4
-        #save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kernel_defines: str = '', module_paths_to_sign: [str] = [], hash_algorithm: str = 'sha512'): 
-        modules = []
-        valid, archive_name = save_tarball(arch, profile = sys.argv[3], stage_define = sys.argv[4], upstream = False, kconfig = sys.argv[5])
+    if sys.argv[2] == build_str and len(sys.argv) == 4:
+        valid, archive_name = build_stage4(arch, stage4_name = sys.argv[3])
         if valid:
             print("SAVED STAGE4 " + archive_name)
     else: # Error message for stages

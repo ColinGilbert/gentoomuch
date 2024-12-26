@@ -39,7 +39,7 @@ Prerequisites:
 --------------
 
 - You need a Linux host. Currently I'm using Ubuntu to bootstrap, but Gentoo with the correct packages is another platform that will work.
-- You need that have ``sudo``, ``python``, ``gpg``, ``pigz``, ``tar``, ``rsync``, ``docker-python``, ``git-python``, ``docker``, and ``docker-compose`` installed.
+- You need that have ``sudo``, ``python``, ``gpg``, ``pigz``, ``tar``, ``rsync``, ``docker-python``, ``git-python``, `gnupg-python`, ``docker``, and ``docker-compose`` installed.
 - You need a default gpg signing key for your user in order to sign stages. You can also use a smartcard. 
 
 Installation:
@@ -55,10 +55,13 @@ Installation:
 - Download a stage3 of your architecture and its .asc signature from upstream and run ``gentoomuch bootstrap <profile-name> stage3-*.tar.xz`` and wait for the first emerge.
 - Once it's done, you should be good to go!
 
+
+I will be creating packages for Gentoo and possibly Ubuntu in the near future.
+
 Usage notes:
 ------------
 
-Your configuration goes into the ``~/gentoomuch-config`` directory.
+Your configuration lives in the ``~/gentoomuch-config`` directory.
 A configuration called "gentoomuch/builder" exists. Modify it when you need to; I made the decision to expose every possible configuration to the end-user. 
 Further documentation is in the config directory. These aforementioned folders are intended to be both part of our pipeline and as living, implicitly-tested documentation for anyone looking to get started.
 

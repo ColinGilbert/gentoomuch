@@ -3,7 +3,6 @@
 import os, sys
 from .gentoomuch_common import output_path, config_path, active_image_tag, stages_path, patches_workdir, patches_export_mountpoint, portage_output_path, kernel_configs_path, kconfigs_mountpoint, kernels_out_path, squashed_ports_dir, squashed_ports_mountpoint
 from .write_file_lines import write_file_lines
-from .get_active_stage import get_active_stage
 from .tag_parser import tag_parser
 
 builder_str = 'builder'
