@@ -11,7 +11,7 @@ save_str            = 'save'
 compile_str         = 'compile'
 
 
-# This thing handles the CLI arguments and interfaces it to the part of GentooMuch that preps a patch.
+# This thing handles the CLI arguments and interfaces it to the part of Gentoomuch that preps a patch.
 class ui_patch_prep_handler:
     
     def __init__(self, index : int):
