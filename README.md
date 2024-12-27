@@ -27,7 +27,7 @@ Nothing ever comes completely cost-free - If you are an existing (ie: skeptical)
 
 - This tool presupposes that you are proficient in Gentoo and Linux in general. If you're a beginner you should try running Gentoo locally before you start automating your builds.
 - The Gentoomuch pipeline takes more time than if you were to simply run emerge on your local system. In exchange, you get robustness, repeatability, and automation.
-- Portage hates not being in control of the kernel sources (especially when compiling/signing kernel modules), so we limit the user to a single version of gentoo-sources, which can be modified in gentoomuch/builder's local portage config files. 
+- Portage hates not being in control of the kernel sources (especially when compiling/signing kernel modules), so we limit the user to a single version of gentoo-sources, which can be modified in gentoomuch-builder's local portage config files. 
 - Your workflow will change a bit. Mostly it'll mean defining your sets of packages/flags and then defining your machines from these sets, instead of directly within /etc/portage on each machine.
 - You have to add flags manually to your configs (ie: copy and paste from emerge output.) Using ``--autounmask-write`` and running ``dispatch-conf`` does't work in a pipeline that uses immutable containers.
 - When making builder images, Gentoomuch keeps the tarball inside the image instead of deleting it as upstream does with their Docker images. This does entail an additional cost of space. However, you then benefit by completely avoiding the chicken-and-egg problem!
@@ -39,7 +39,7 @@ Usage notes:
 ------------
 
 Your configuration lives in the ``~/gentoomuch-config`` directory.
-A configuration called "gentoomuch/builder" exists. Modify it when you need to; I made the decision to expose every possible configuration to the end-user. 
+A configuration called "gentoomuch-builder" exists. Modify it when you need to; I made the decision to expose every possible configuration to the end-user. 
 Further documentation is in the config directory. These aforementioned folders are intended to be both part of our pipeline and as living, implicitly-tested documentation for anyone looking to get started.
 
 CLI Reference:
@@ -77,7 +77,7 @@ Installation:
 - (Optional) Create a ``gentoomuch-data`` directory in your home directory and set it to mount tmpfs.
 - Run ``gentoomuch init``
 - Create a CPU definition in ``~/gentoomuch-config/cpu.defines``
-- Edit ``~/gentoomuch-config/stage3-defines/gentoomuch/builder/cpu`` to point to that CPU definition.
+- Edit ``~/gentoomuch-config/stage3-defines/gentoomuch-builder/cpu`` to point to that CPU definition.
 - Download a stage3 of your architecture and its .asc signature from upstream and run ``gentoomuch bootstrap <profile-name> stage3-*.tar.xz`` and wait for the first emerge.
 - Once it's done, you should be good to go!
 

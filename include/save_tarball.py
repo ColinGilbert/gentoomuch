@@ -38,9 +38,9 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     if os.path.isfile(os.path.join(stages_path, archive_name)):
         os.remove(os.path.join(stages_path, archive_name))
     if upstream:
-        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = True)
+        swap_stage(arch, profile, stage_define = 'gentoomuch-builder', upstream = True)
     else:
-        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = False, custom_stage = custom_stage)
+        swap_stage(arch, profile, stage_define = 'gentoomuch-builder', upstream = False, custom_stage = custom_stage)
     packages = []
     if os.path.isfile(desired_packages_path):
         packages = read_file_lines(desired_packages_path)
@@ -97,7 +97,7 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
     if patch_counter > 0:
         cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
     if custom_stage != '':
-        cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch/builder && "
+        cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch-builder && "
         if packages_str.strip() != '':
             cmd_str += "emerge --root=/mnt/gentoo " + packages_str + " && "    
         cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "

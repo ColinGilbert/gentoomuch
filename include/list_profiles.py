@@ -10,7 +10,7 @@ def list_profiles(arch):
     desired = get_desired_profile()
     print("Listing compatible system profiles:")
     for p in get_profiles():
-        if docker_stage_exists(arch, p, 'gentoomuch/builder', False):
+        if docker_stage_exists(arch, p, 'gentoomuch-builder', False):
             bootstrapped_indicator = 'GOOD TO GO :)  '
         elif docker_stage_exists(arch, p, '', True):
             bootstrapped_indicator = 'UPSTREAM READY '

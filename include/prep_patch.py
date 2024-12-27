@@ -55,7 +55,7 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
     #TODO Change to desired profile
     profile = get_desired_profile()
     
-    swap_stage(get_arch(), profile , stage_define = 'gentoomuch/builder', upstream = False, patch_to_test = patch_name)
+    swap_stage(get_arch(), profile , stage_define = 'gentoomuch-builder', upstream = False, patch_to_test = patch_name)
     print("PATCHING")
     # We build the cmd_str
     cmd_str += 'mkdir -p ' + temp_sourcedir + ' && '

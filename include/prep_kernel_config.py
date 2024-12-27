@@ -11,7 +11,7 @@ def prep_kernel_config(arch: str, profile: str, kconf: str):
         cmd_str += "cp " + mounted_kconf_path + " /usr/src/linux/.config && "
     cmd_str += "make nconfig && "
     cmd_str += "cp /usr/src/linux/.config " + mounted_kconf_path
-    swap_stage(arch, profile, stage_define = "gentoomuch/builder", upstream = False) 
+    swap_stage(arch, profile, stage_define = "gentoomuch-builder", upstream = False) 
     code = os.system("cd " + output_path + " && docker-compose up --quiet-pull --no-start && docker-compose run gentoomuch-builder /bin/bash -c '" + cmd_str + "'")
     if code == 0:
         pass

@@ -7,7 +7,7 @@ from .package_from_patch import package_from_patch
 def compile_patches(arch: str, patches: [str]):
     profiles = get_profiles()
     for profile in profiles:
-        swap_stage(arch, profile, 'gentoomuch/builder')
+        swap_stage(arch, profile, 'gentoomuch-builder')
         for patch in patches:
             valid, package = package_from_patch(patch)
             if valid:

@@ -13,7 +13,7 @@ def compile_patch(profile: str, patch_name : str, from_workdir: bool) -> bool:
     cmd_str = 'emerge --onlydeps =' + package_name + ' && '
     cmd_str += "emerge --usepkg n =" + package_name
     if valid:
-        swap_stage(get_arch(), profile, 'gentoomuch/builder', False, str(patch_name))
+        swap_stage(get_arch(), profile, 'gentoomuch-builder', False, str(patch_name))
         code = os.system("cd " + output_path + " && docker-compose run gentoomuch-builder /bin/bash -c '" + cmd_str + "'")
         if code == 0:
             pass

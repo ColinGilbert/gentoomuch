@@ -176,7 +176,7 @@ elif prime_cmd == bootstrap_str:
         exit("Failed to load tarball")
     if not has_sync_happened():
         print("Syncing for first time!")
-        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = True)
+        swap_stage(arch, profile, stage_define = 'gentoomuch-builder', upstream = True)
         code = sync()
         if code != 0:
             exit("Could not sync")
@@ -184,9 +184,9 @@ elif prime_cmd == bootstrap_str:
             set_sync_happened()
     if are_patches_in_conflict():
         exit()
-    valid, archive_name = save_tarball(arch, profile, stage_define = "gentoomuch/builder", upstream = True)
+    valid, archive_name = save_tarball(arch, profile, stage_define = "gentoomuch-builder", upstream = True)
     if valid:
-        results = containerize(os.path.join(stages_path, archive_name), arch, profile, stage_define = 'gentoomuch/builder', upstream = False)
+        results = containerize(os.path.join(stages_path, archive_name), arch, profile, stage_define = 'gentoomuch-builder', upstream = False)
         if results:
             print("******************************************************************************************************************")
             print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
@@ -274,7 +274,7 @@ elif prime_cmd == pipeline_str:
 elif prime_cmd == sync_str:
     if has_sync_happened():
         profile = get_desired_profile()
-        swap_stage(arch, profile, stage_define = 'gentoomuch/builder', upstream = False)
+        swap_stage(arch, profile, stage_define = 'gentoomuch-builder', upstream = False)
         sync()
     else:
         exit("Need to bootstrap a profile prior to first sync")

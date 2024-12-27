@@ -6,9 +6,9 @@ from .swap_stage import swap_stage
 
 
 def freshroot(arch: str, profile: str):
-    print("    Trying to start fresh root with profile " + profile + " and stage definition gentoomuch/builder")
+    print("    Trying to start fresh root with profile " + profile + " and stage definition gentoomuch-builder")
     #create_composefile(output_path)
-    swap_stage(arch, profile, "gentoomuch/builder", False) 
+    swap_stage(arch, profile, "gentoomuch-builder", False) 
     code = os.system("cd " + output_path + " && docker-compose up --quiet-pull --no-start && docker-compose run gentoomuch-builder /bin/bash")
     if code == 0:
         pass
