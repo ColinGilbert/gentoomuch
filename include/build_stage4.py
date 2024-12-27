@@ -3,6 +3,7 @@ from .get_profiles import get_profiles
 from .gentoomuch_common import stage4_defines_path, saved_patches_path
 from .save_tarball import save_tarball
 from .get_profiles import get_profiles
+from .are_patches_in_conflict import are_patches_in_conflict
 
 def build_stage4(arch: str, stage4_name: str):
     path = os.path.join(stage4_defines_path, stage4_name)
@@ -36,6 +37,8 @@ def build_stage4(arch: str, stage4_name: str):
         if os.path.isdir(p):
             patches.append(p)
     #for (kconfig, stage4_name, profile, stage3_name, scripts, removes) in stage4_list:
+    if are_patches_in_conflict():
+        return False,''
     valid, archive_name = save_tarball(arch, profile, stage_define = stage3_name, upstream = False, patches = patches, patches_have_been_compiled = True, kconfig = kconf, friendly_name = stage4_name, custom_stage = stage3_name, scripts = scripts, removes = removes)
     if not valid:
         return False,''

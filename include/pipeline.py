@@ -17,7 +17,7 @@ def pipeline(arch: str):
     #TODO: Sort them by kernel config
     stage4_list = []
     for stage4_name in stage4s:
-        build_stage4(arch, stage4_name)
+        valid, archive_name = build_stage4(arch, stage4_name)
         if not valid:
             print("PIPELINE BROKEN TRYING TO SAVE: " + stage4_name)
             return False

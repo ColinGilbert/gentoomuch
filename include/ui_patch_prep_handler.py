@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import re, os, sys
-from .patches import prep_patch
+from .prep_patch import prep_patch
 from .gentoomuch_common import usage_str
 
 force_arg_str       = '--force'

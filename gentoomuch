@@ -16,7 +16,9 @@ from include.get_desired_stage import get_desired_stage
 from include.get_desired_profile import get_desired_profile
 from include.get_docker_tag import get_docker_tag
 from include.save_tarball import save_tarball
-from include.patches import prep_patch, try_patch, save_patch
+from include.prep_patch import prep_patch
+from include.compile_patch import compile_patch
+from include.save_patch import save_patch
 from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
 from include.get_profiles import get_profiles
 from include.remove_old_docker_images import remove_old_docker_images
@@ -28,6 +30,7 @@ from include.exec_in_chroot import exec_in_chroot
 from include.exec_user_hooks import exec_user_hooks
 from include.compile_patches import compile_patches
 from include.build_stage4 import build_stage4
+from include.are_patches_in_conflict import are_patches_in_conflict
 
 # Our commandline keywords
 init_str        = 'init'
@@ -121,14 +124,14 @@ if len(sys.argv) > 1:
     else:
         print_usage()
         exit()
-##########################
+#######################
 # Initialize temp dirs
-##########################
+#######################
 if prime_cmd == init_str:
     init()
-##############################################
+####################################
 # Stage related commands (building).
-##############################################
+####################################
 elif prime_cmd == stage_str:
     if sys.argv[2] == build_str and len(sys.argv) == 4:
         valid, archive_name = build_stage4(arch, stage4_name = sys.argv[3])
@@ -156,9 +159,9 @@ elif prime_cmd == profile_str:
     else: # Error message for profile
         print_usage_profile() 
         exit()
-#############################################
+###################################
 # Bootstrap a stage from a tarball.
-#############################################
+###################################
 elif prime_cmd == bootstrap_str:
     if not len(sys.argv) == 4:
         print_usage_bootstrap()
@@ -179,6 +182,8 @@ elif prime_cmd == bootstrap_str:
             exit("Could not sync")
         else:
             set_sync_happened()
+    if are_patches_in_conflict():
+        exit()
     valid, archive_name = save_tarball(arch, profile, stage_define = "gentoomuch/builder", upstream = True)
     if valid:
         results = containerize(os.path.join(stages_path, archive_name), arch, profile, stage_define = 'gentoomuch/builder', upstream = False)
@@ -206,7 +211,7 @@ elif prime_cmd == patch_str:
             patch_name = sys.argv[3]
             #print(patch_name)
             profile = get_desired_profile()
-            try_patch(profile, patch_name)
+            compile_patch(profile, patch_name, True)
         else:
             exit("You need to provide a patch name to try.")
     # We save a patch to our config/patches directory
@@ -217,21 +222,19 @@ elif prime_cmd == patch_str:
         else:
             exit("Which patch do you wish to save?")
     elif len(sys.argv) > 2 and sys.argv[2] == compile_str:
+        if are_patches_in_conflict():
+            exit()
         patches= []
         for patch in os.listdir(saved_patches_path):
             #TODO: Collect patch names into list
             if patch != "README.md":
                 patches.append(patch)
         profiles = get_profiles()
-        for profile in profiles: 
-            valid, name = save_tarball(arch, profile, stage_define = "gentoomuch/builder", upstream =  False, patches = patches, patches_have_been_compiled = False)
-            if valid:
-               results = containerize(os.path.join(stages_path, name), arch, profile, stage_define = 'gentoomuch/builder', upstream = False)
-               if not results:
-                exit("GENTOOMUCH: Failed to containerize patched stage")
-            else:
-                exit("GENTOOMUCH: Failed to save patched stage tarball")
-            #TODO: Add the rest in the pipeline
+        for profile in profiles:
+            for patch in patches:
+                results = compile_patch(profile, patch, False)
+                if not results:
+                    exit()
     else:
         print_usage_patch()
     exit()
@@ -275,9 +278,9 @@ elif prime_cmd == sync_str:
         sync()
     else:
         exit("Need to bootstrap a profile prior to first sync")
-#
+##########
 # Testing
-#
+##########
 elif prime_cmd == test_str:
     print(str(exec_user_hooks(os.path.join(stages_path, 'example-desktop.tar.gz'), scripts = ['example.sh'], removes = ['example'])))
 ################################

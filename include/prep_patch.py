@@ -13,12 +13,11 @@ from .apply_saved_patches import apply_saved_patches
 # def get_first_commit(repo_path : str) -> str:
 #     return "git -C " + repo_path + " log | grep commit | tail -2 | head -1 | sed -e 's/commit //g' "
 
-def strip_version_tag(package_name) -> str:
+def _strip_version_tag(package_name) -> str:
     return re.sub('-r[0-9]+$', '', package_name)
 
-def strip_version(package_name) -> str:
-    return re.sub('-[0-9.]+$', '', strip_version_tag(package_name))    
-
+def _strip_version(package_name) -> str:
+    return re.sub('-[0-9.]+$', '', _strip_version_tag(package_name))
 
 # Here, we will do the tooling required for you to start patching a given package+version
 # Then it unpacks your ebuild into it, and initializes the git repository for patching
@@ -30,7 +29,7 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
         return False
     repo_name = 'gentoo' if repo_name == '' else repo_name
     versioned_package           = package + '-' + version
-    versioned_package_notag     = strip_version(versioned_package)
+    versioned_package_notag     = _strip_version(versioned_package)
     patch_export_hostdir        = os.path.join(patches_workdir, patch_name)
     if os.path.isdir(patch_export_hostdir) and len(os.listdir(patch_export_hostdir)) != 0:
         print("PREP PATCH: A patch-in-progress workdir already is present at " + patch_export_hostdir + " and is not empty!")
@@ -38,7 +37,8 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
     else:
         os.makedirs(patch_export_hostdir, exist_ok = True)
     # ebuild $(portageq get_repo_path / gentoo)/ package-category/package-name/package-name-version.ebuild clean unpack
-    cmd_str = 'PORTAGE_TMPDIR="' + patches_export_mountpoint + '" ebuild $(portageq get_repo_path / ' + repo_name + ')/' + package + '/' + versioned_package.split('/')[-1] + '.ebuild clean unpack && cd ' + patches_export_mountpoint + ' && '
+    cmd_str = 'PORTAGE_TMPDIR="' + patches_export_mountpoint + '" ebuild $(portageq get_repo_path / ' + repo_name + ')/' + package + '/' + versioned_package.split('/')[-1] + '.ebuild clean unpack && '
+    cmd_str += 'cd ' + patches_export_mountpoint + ' && '
     #################################################################################################################################
     # BASIC IDEA:
     # Here, we will clean up the directory by removing all non source-code items.
@@ -87,47 +87,3 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
         if code == 0:
             pass
     return True
-
-def save_patch(patch_name : str) -> bool:
-    p = os.path.join(saved_patches_path, patch_name)
-    if not os.path.isdir(p):
-        os.makedirs(p, exist_ok = True)
-    valid, versioned_package = package_from_patch(patch_name, from_workdir = True)
-    if not valid == True:
-        print("SAVE PATCH: Could not derive package name") 
-        return False
-    print("SAVE PATCH: " + versioned_package)
-    base_path = os.path.join(path_from, patch_name, versioned_package)
-    for d in os.listdir(base_path):
-        print(d)
-    final_path = os.path.join(base_path, d)
-    print("PATCH PATH: " + final_path)
-    repo = git.Repo(final_path)
-    # Get first commit.
-    first_commit = list(repo.iter_commits('master'))[-1]
-    num_backtracks = len(versioned_package.split('/'))
-    final_output_dir = os.path.join(path_to, versioned_package)
-    os.system("cd " + final_path + " && git diff " + first_commit.hexsha + " | grep -v '^diff\|^index' | tee ." + patch_name + ".patch")
-    if os.path.isdir(final_output_dir) and len(os.listdir(final_output_dir)) > 0:
-        print("While saving the patch, another directory was found and it is not empty!")
-        os.system('rm -rf ' + os.path.join(final_output_dir,'*'))
-    os.makedirs(final_output_dir, exist_ok = True)
-    shutil.move(os.path.join(final_path, '.' + patch_name + '.patch'), os.path.join(final_output_dir,  patch_name + '.patch'))
-    return True
-
-def try_patch(profile: str, patch_name : str) -> bool:
-    valid, package_name = package_from_patch(patch_name, from_workdir = True)
-    if not valid:
-        print("TRY PATCH: Invalid patch name entered. Stopping.")
-        return False
-    patch_outdir = os.path.join(portage_output_path, 'patches')
-    cmd_str = 'emerge --onlydeps =' + package_name + ' && '
-    cmd_str += "emerge --usepkg n =" + package_name
-    if valid:
-        swap_stage(get_arch(), profile, 'gentoomuch/builder', False, str(patch_name))
-        code = os.system("cd " + output_path + " && docker-compose run gentoomuch-builder /bin/bash -c '" + cmd_str + "'")
-        if code == 0:
-            pass
-        return True
-    print("TRY_PATCH:: Could not try patch " + patch_name)
-    return False

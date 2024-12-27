@@ -25,7 +25,7 @@ What's the catch?
 
 Nothing ever comes completely cost-free - If you are an existing (ie: skeptical) Gentoo user asking yourself whether or not this tool is worth your while, I will be upfront about the limitations:
 
-- This tool presupposes that you know Gentoo quite well. If you're a beginner you should try running Gentoo locally before upgrading.
+- This tool presupposes that you are proficient in Gentoo and Linux in general. If you're a beginner you should try running Gentoo locally before you start automating your builds.
 - The Gentoomuch pipeline takes more time than if you were to simply run emerge on your local system. In exchange, you get robustness, repeatability, and automation.
 - Portage hates not being in control of the kernel sources (especially when compiling/signing kernel modules), so we limit the user to a single version of gentoo-sources, which can be modified in gentoomuch/builder's local portage config files. 
 - Your workflow will change a bit. Mostly it'll mean defining your sets of packages/flags and then defining your machines from these sets, instead of directly within /etc/portage on each machine.
@@ -49,13 +49,13 @@ CLI Reference:
 - ``gentoomuch freshroot``: Drops you into a builder environment. Here, you can test out different use-flags for emerging, etc.
 - ``gentoomuch pipeline``: Runs the pipeline. It'll build all stage4s defined in ``~/gentoomuch-config``.
 - ``gentoomuch sync``: Runs emerge --sync.
-- ``gentoomuch bootstrap <profile.name> <tarball.filename>``: Bootstraps a builder from an upstream stage3, for a given profile.
+- ``gentoomuch bootstrap <profile.name> <tarball.filename>``: Bootstraps a builder from an upstream stage3 ands its corresponding .asc signature, for a profile you define.
 - ``gentoomuch profile ls``: Lists the profiles you've bootstrapped.
 - ``gentoomuch profile set <profile.name>``: Sets the profile that'll be used when calling ``freshroot``
-- ``gentoomuch stage build <stage4.definition>``: Builds a stage4 that you've defined. This is to 
+- ``gentoomuch stage build <stage4.definition>``: Builds a stage4 that you've defined. This for you to test a build before running the whole pipeline.
 - ``gentoomuch kernel prep <kernel.config>``: Prepares a named kernel config and drops you into ``make nconfig``. If the configuration doesn't exist, Gentoomuch creates a new one. 
-- ``gentoomuch kernel update`: Deletes all downloaded kernel source files and re-download fresh ones.
-- ``gentoomuch patch prep  <patch.name> <package.name> <version-str>``: Sets up a patch directory in ``~/gentoomuch-data/patches.work/patch.name``. You then modify the files within it according to your needs.
+- ``gentoomuch kernel update``: Deletes all downloaded kernel source files and re-download fresh ones.
+- ``gentoomuch patch prep <patch.name> <package.name> <version-str>``: Sets up a patch directory in ``~/gentoomuch-data/patches.work/patch.name``. You then modify the files within it according to your needs.
 - ``gentoomuch patch try <patch.name>``: Tries to compile the patch in your patches working directory.
 - ``gentoomuch patch save <patch.name>``: Saves a patch to ``~/gentoomuch-config/user.patches/patch.name``.
 - ``gentoomuch patch compile``: Compiles all patches.
@@ -64,8 +64,8 @@ CLI Reference:
 Prerequisites:
 --------------
 
-- You need a Linux host. Currently I'm using Ubuntu to bootstrap, but Gentoo with the correct packages is another platform that will work.
-- You need that have ``sudo``, ``python``, ``gpg``, ``pigz``, ``tar``, ``rsync``, ``docker-python``, ``git-python``, `gnupg-python`, ``docker``, and ``docker-compose`` installed.
+- You need a Linux host. Currently I'm using Ubuntu to bootstrap, but Gentoo with the correct packages is another platform that will work. In fact, Gentoo is the final target for deployment. 
+- You need that have ``sudo``, ``python``, ``gpg``, ``pigz``, ``tar``, ``rsync``, ``python-docker`` (Ubuntu)/``dev-python/docker`` (Gentoo), ``gitpython``, `python-gnupg`, ``docker``, ``buildx``, and ``docker-compose`` installed.
 - You need a default gpg signing key for your user in order to sign stages. You can also use a smartcard. 
 
 Installation:
@@ -81,8 +81,7 @@ Installation:
 - Download a stage3 of your architecture and its .asc signature from upstream and run ``gentoomuch bootstrap <profile-name> stage3-*.tar.xz`` and wait for the first emerge.
 - Once it's done, you should be good to go!
 
-
-I will be creating packages for Gentoo and possibly Ubuntu in the near future. Stay tuned for updated!
+I will be creating packages for Gentoo and possibly Ubuntu in the near future. Stay tuned for updates!
 
 Roadmap:
 --------
