@@ -10,8 +10,8 @@ def compile_patch(profile: str, patch_name : str, from_workdir: bool) -> bool:
         print("PATCH COMPILATION: Invalid patch name entered. Stopping.")
         return False
     patch_outdir = os.path.join(portage_output_path, 'patches')
-    cmd_str = 'emerge --onlydeps =' + package_name + ' && '
-    cmd_str += "emerge --usepkg n =" + package_name
+    cmd_str = 'emerge -q --onlydeps =' + package_name + ' && '
+    cmd_str += "emerge -q --usepkg n =" + package_name
     if valid:
         swap_stage(get_arch(), profile, 'gentoomuch-builder', False, str(patch_name))
         code = os.system("cd " + output_path + " && docker-compose run gentoomuch-builder /bin/bash -c '" + cmd_str + "'")

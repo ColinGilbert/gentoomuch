@@ -30,12 +30,14 @@ def create_composefile(output_path : str, exporting_patch : str = ''):
     lines.append('    driver: local\n')
     lines.append('  kernel_src:\n')
     lines.append('    driver: local\n')
+    lines.append('  gnupg_dir:\n')
+    lines.append('    driver: local\n')
     write_file_lines(os.path.join(output_path, 'docker-compose.yml'), lines)
     return True
 
 def __output_config(container_type_str : str, exporting_patch : str = ''):
     if not container_type_str in containers:
-        sys.exit('Gentoomuch.create-create_composefile: Invalid container type argument \"' + container_type_str  +  '\"')
+        sys.exit('CREATE COMPOSEFILE: Invalid container type argument \"' + container_type_str  +  '\"')
     is_builder              = bool(container_type_str == builder_str)
     is_updater              = bool(container_type_str == updater_str)
     is_patcher              = bool(container_type_str == patcher_str)
@@ -57,6 +59,7 @@ def __output_config(container_type_str : str, exporting_patch : str = ''):
     results.append('    - /dev:/dev\n')
     results.append('    - /proc:/proc\n')
     results.append('    - /sys:/sys:ro\n')
+    results.append('    - gnupg_dir:/root/.gnupg\n')
     results.append('    - binpkgs:/var/cache/binpkgs\n')
     results.append('    - distfiles:/var/cache/distfiles\n')
     results.append('    - repos:/var/db/repos\n')

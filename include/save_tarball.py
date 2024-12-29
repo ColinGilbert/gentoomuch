@@ -77,9 +77,9 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
         cmd_str += "INSTALL_MOD_PATH=/mnt/gentoo make modules_install && "
         cmd_str += "touch /usr/src/linux/Module.symvers && " # Hack to compile zfs-kmod
     if upstream:
-        cmd_str += "emerge --root=/ pigz && "
-    cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + (" --emptytree gentoo-sources " if upstream else " -uD --changed-use --newuse ") + packages_str + " @world && "
-    cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
+        cmd_str += "emerge -q --root=/ pigz && "
+    cmd_str += "emerge -q --root=/mnt/gentoo -j" + jobs + (" --emptytree gentoo-sources " if upstream else " -uD --changed-use --newuse ") + packages_str + " @world && "
+    cmd_str += "emerge -q --depclean --root=/mnt/gentoo --with-bdeps=n && "
     patch_counter = 0
     for patch in patches:
         if patch != '':
@@ -87,20 +87,20 @@ def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, pat
             valid, package = package_from_patch(patch, False)
             if valid:
                 if patches_have_been_compiled:
-                    cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot =" + package + " && "
+                    cmd_str += "emerge -q --root=/mnt/gentoo -j" + jobs + " --oneshot =" + package + " && "
                 else:
-                    cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --onlydeps =" + package + " && "
-                    cmd_str += "emerge --root=/mnt/gentoo -j" + jobs + " --oneshot --usepkg n =" + package + " && "
+                    cmd_str += "emerge -q --root=/mnt/gentoo -j" + jobs + " --oneshot --onlydeps =" + package + " && "
+                    cmd_str += "emerge -q --root=/mnt/gentoo -j" + jobs + " --oneshot --usepkg n =" + package + " && "
     if kconfig and not upstream:
-        cmd_str += 'emerge --root=/mnt/gentoo --onlydeps @module-rebuild && '
-        cmd_str += 'emerge --root=/mnt/gentoo --usepkg n @module-rebuild && '
+        cmd_str += 'emerge -q --root=/mnt/gentoo --onlydeps @module-rebuild && '
+        cmd_str += 'emerge -q --root=/mnt/gentoo --usepkg n @module-rebuild && '
     if patch_counter > 0:
-        cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
+        cmd_str += "emerge -q --depclean --root=/mnt/gentoo --with-bdeps=n && "
     if custom_stage != '':
-        cmd_str += "emerge --root=/mnt/gentoo --unmerge @gentoomuch-builder && "
+        cmd_str += "emerge -q --root=/mnt/gentoo --unmerge @gentoomuch-builder && "
         if packages_str.strip() != '':
-            cmd_str += "emerge --root=/mnt/gentoo " + packages_str + " && "    
-        cmd_str += "emerge --depclean --root=/mnt/gentoo --with-bdeps=n && "
+            cmd_str += "emerge -q --root=/mnt/gentoo " + packages_str + " && "    
+        cmd_str += "emerge -q --depclean --root=/mnt/gentoo --with-bdeps=n && "
     cmd_str += "cd / && "
     cmd_str += "chown " + uid + ":" + gid + " -R /var/tmp/portage && "
     cmd_str += "cd /mnt/gentoo && "

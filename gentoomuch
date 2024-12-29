@@ -2,7 +2,7 @@
 
 import os, sys, re
 from typing import Tuple
-from include.gentoomuch_common import arch_config_path, config_path, output_path, usage_str, saved_patches_path, stages_path
+from include.gentoomuch_common import arch_config_path, config_path, output_path, usage_str, saved_patches_path, stages_path, stage3_defines_path
 from include.init import init
 from include.freshroot import freshroot
 from include.sync import sync, has_sync_happened, set_sync_happened
@@ -31,6 +31,7 @@ from include.exec_user_hooks import exec_user_hooks
 from include.compile_patches import compile_patches
 from include.build_stage4 import build_stage4
 from include.are_patches_in_conflict import are_patches_in_conflict
+from include.read_file_lines import read_file_lines
 
 # Our commandline keywords
 init_str        = 'init'
@@ -166,6 +167,8 @@ elif prime_cmd == bootstrap_str:
     if not len(sys.argv) == 4:
         print_usage_bootstrap()
         exit()
+    if are_patches_in_conflict():
+        exit()
     profile = sys.argv[2]
     code = create_composefile(output_path)
     if code:
@@ -182,9 +185,11 @@ elif prime_cmd == bootstrap_str:
             exit("Could not sync")
         else:
             set_sync_happened()
-    if are_patches_in_conflict():
-        exit()
-    valid, archive_name = save_tarball(arch, profile, stage_define = "gentoomuch-builder", upstream = True)
+    scripts = []
+    scripts_file = os.path.join(stage3_defines_path, 'gentoomuch-builder', 'scripts')
+    if os.path.isfile(scripts_file):
+        scripts = read_file_lines(scripts_file)
+    valid, archive_name = save_tarball(arch, profile, stage_define = "gentoomuch-builder", upstream = True, scripts = scripts)
     if valid:
         results = containerize(os.path.join(stages_path, archive_name), arch, profile, stage_define = 'gentoomuch-builder', upstream = False)
         if results:

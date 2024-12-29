@@ -9,7 +9,7 @@ from .get_gentoomuch_gid import get_gentoomuch_gid
 def sync():
     print("GENTOOMUCH: Syncing Portage. This may take some time...")
     cmd_str = 'emerge -v --sync && '
-    cmd_str += 'emerge --oneshot squashfs-tools && '
+    cmd_str += 'emerge -q --oneshot squashfs-tools && '
     cmd_str += 'rm -f ' + squashed_ports_mounted_filepath + ' && '
     cmd_str += 'mksquashfs /var/db/repos/gentoo ' + squashed_ports_mounted_filepath + ' && '
     cmd_str += 'chown ' + get_gentoomuch_uid() + ':' + get_gentoomuch_gid() + ' ' + squashed_ports_mounted_filepath
