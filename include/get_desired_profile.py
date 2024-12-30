@@ -10,4 +10,4 @@ def get_desired_profile():
             results = file.read().strip()
             return results
     else:
-        exit("You need to set a profile")
+        return ''

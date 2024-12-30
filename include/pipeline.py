@@ -5,6 +5,9 @@ from .get_desired_profile import get_desired_profile
 from .build_stage4 import build_stage4
 
 def pipeline(arch: str):
+    profile = get_desired_profile()
+    if profile == '':
+        exit("You need to set a desired profile.")
     # Get all stage 4 definitions
     stage4s = []
     for s in os.listdir(stage4_defines_path):
@@ -21,5 +24,4 @@ def pipeline(arch: str):
         if not valid:
             print("PIPELINE BROKEN TRYING TO SAVE: " + stage4_name)
             return False
-    #clean_kernel_sources(arch, get_desired_profile())
-    return True
+    clean_kernel_sources(arch, profile)

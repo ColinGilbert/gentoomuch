@@ -92,7 +92,7 @@ def print_usage_bootstrap():
 
 def print_usage_patch():
     patch_usage = usage_str + patch_str + ' '
-    print(patch_usage + prep_str + '  <patch.name> <package.name> <version-str>')
+    print(patch_usage + prep_str + ' <patch.name> <package.name> <version-str>')
     print(patch_usage + try_str + ' <patch.name>')
     print(patch_usage + save_str + ' <patch.name>')
     print(patch_usage + compile_str)
@@ -118,6 +118,9 @@ if os.path.isfile(arch_config_path):
         arch = file.read().strip()
 else:
     exit("You need an arch config (amd64|arm64) at " + arch_config_path)
+
+profile = get_desired_profile()
+
 # Now, we get properly started.
 ########################
 # Get the first command.
@@ -176,6 +179,8 @@ elif prime_cmd == bootstrap_str:
         exit()
     profile = sys.argv[2]
     path = os.path.join(os.getcwd(), sys.argv[3])
+    if profile == '':
+        exit("You need to set a desired profile")
     results = bootstrap_builder(arch, profile, tarball_path = path)
     if results:
         print("******************************************************************************************************************")
@@ -184,7 +189,7 @@ elif prime_cmd == bootstrap_str:
         print("***                                                LIKE A BOSS!                                                ***")
         print("******************************************************************************************************************")
     else:
-        exit("GENTOOMUCH: Failed to containerize bootstrapped stage")
+        exit("GENTOOMUCH: Failed to containerize bootstrapped stage3")
     exit()
 ##################
 # Handle patching.
@@ -200,7 +205,8 @@ elif prime_cmd == patch_str:
         if len(sys.argv) > 3:
             patch_name = sys.argv[3]
             #print(patch_name)
-            profile = get_desired_profile()
+            if profile == '':
+                exit("You need to set a desired profile")
             compile_patch(profile, patch_name, True)
         else:
             exit("You need to provide a patch name to try.")
@@ -220,9 +226,9 @@ elif prime_cmd == patch_str:
             if patch != "README.md":
                 patches.append(patch)
         profiles = get_profiles()
-        for profile in profiles:
+        for p in profiles:
             for patch in patches:
-                results = compile_patch(profile, patch, False)
+                results = compile_patch(p, patch, False)
                 if not results:
                     exit()
     else:
@@ -235,7 +241,9 @@ elif prime_cmd == kernel_str:
     if len(sys.argv) > 2:
         if sys.argv[2] == prep_str:
             if len(sys.argv) > 3:
-                prep_kernel_config(arch, profile = get_desired_profile(), kconf = sys.argv[3])
+                if profile == '':
+                    exit("You need to set a desired profile")
+                prep_kernel_config(arch, profile , kconf = sys.argv[3])
             else:
                 exit("Need a kernel definition to prep kernel.")
         if sys.argv[2] == update_str:
@@ -247,7 +255,7 @@ elif prime_cmd == kernel_str:
 # Deal with the freshroot command. 
 ##################################
 elif prime_cmd == freshroot_str:
-    freshroot(arch, profile = get_desired_profile())
+    freshroot(arch, profile)
 #######################
 # Run pipelined builds.
 #######################
@@ -263,7 +271,8 @@ elif prime_cmd == pipeline_str:
 ####################
 elif prime_cmd == sync_str:
     if has_sync_happened():
-        profile = get_desired_profile()
+        if profile == '':
+            exit("You need to set a desired profile")
         swap_stage(arch, profile, stage_define = 'gentoomuch-builder', upstream = False)
         sync()
     else:

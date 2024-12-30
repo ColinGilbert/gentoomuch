@@ -52,9 +52,9 @@ def prep_patch(patch_name: str, package: str, version: str, force: bool, repo_na
     where_all_the_actual_code_is    = os.path.join(patches_export_mountpoint, 'portage', versioned_package, 'work', '*')
     # Now we assemble the actual command string.
     # Now we can spin up a docker and unpack that patch into the workdir.
-    #TODO Change to desired profile
     profile = get_desired_profile()
-    
+    if profile == '':
+        exit("You need to set a desired profile.")
     swap_stage(get_arch(), profile , stage_define = 'gentoomuch-builder', upstream = False, patch_to_test = patch_name)
     print("PATCHING")
     # We build the cmd_str

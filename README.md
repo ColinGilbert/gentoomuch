@@ -48,7 +48,7 @@ CLI Reference:
 - ``gentoomuch init``: Initializes the ``~/gentoomuch-data`` directory. If tmpfs is mounted to it, then you need to run this command every boot. 
 - ``gentoomuch freshroot``: Drops you into a builder environment. Here, you can test out different use-flags for emerging, etc.
 - ``gentoomuch pipeline``: Runs the pipeline. It'll build all stage4s defined in ``~/gentoomuch-config``.
-- ``gentoomuch sync``: Runs emerge -q --sync.
+- ``gentoomuch sync``: Runs emerge --sync, among other things.
 - ``gentoomuch bootstrap <profile.name> <tarball.filename>``: Bootstraps a builder from an upstream stage3 ands its corresponding .asc signature, for a profile you define.
 - ``gentoomuch profile ls``: Lists the profiles you've bootstrapped.
 - ``gentoomuch profile set <profile.name>``: Sets the profile that'll be used when calling ``freshroot``
