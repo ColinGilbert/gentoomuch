@@ -32,6 +32,9 @@ from include.compile_patches import compile_patches
 from include.build_stage4 import build_stage4
 from include.are_patches_in_conflict import are_patches_in_conflict
 from include.read_file_lines import read_file_lines
+from include.bootstrap_builder import bootstrap_builder
+from include.update_builder import update_builder
+
 
 # Our commandline keywords
 init_str        = 'init'
@@ -82,6 +85,7 @@ def print_usage_kernel():
 def print_usage_profile():
     print(usage_str + profile_str + ' ' + ls_str)
     print(usage_str + profile_str + ' ' + set_str + ' <profile.name>')
+    print(usage_str + profile_str + ' ' + update_str)
 
 def print_usage_bootstrap():
     print(usage_str + bootstrap_str + ' <profile.name> <tarball.filename>')
@@ -157,6 +161,9 @@ elif prime_cmd == profile_str:
         else:
             print("You need to set a profile by name.")
         exit()
+    elif sys.argv[2] == update_str:
+        for p in get_profiles():
+            results = update_builder(arch, profile = p)
     else: # Error message for profile
         print_usage_profile() 
         exit()
@@ -167,39 +174,17 @@ elif prime_cmd == bootstrap_str:
     if not len(sys.argv) == 4:
         print_usage_bootstrap()
         exit()
-    if are_patches_in_conflict():
-        exit()
     profile = sys.argv[2]
-    code = create_composefile(output_path)
-    if code:
-      pass
     path = os.path.join(os.getcwd(), sys.argv[3])
-    code = containerize(path, arch, profile, stage_define = '', upstream = True)
-    if not code:
-        exit("Failed to load tarball")
-    if not has_sync_happened():
-        print("Syncing for first time!")
-        swap_stage(arch, profile, stage_define = 'gentoomuch-builder', upstream = True)
-        code = sync()
-        if code != 0:
-            exit("Could not sync")
-        else:
-            set_sync_happened()
-    scripts = []
-    scripts_file = os.path.join(stage3_defines_path, 'gentoomuch-builder', 'scripts')
-    if os.path.isfile(scripts_file):
-        scripts = read_file_lines(scripts_file)
-    valid, archive_name = save_tarball(arch, profile, stage_define = "gentoomuch-builder", upstream = True, scripts = scripts)
-    if valid:
-        results = containerize(os.path.join(stages_path, archive_name), arch, profile, stage_define = 'gentoomuch-builder', upstream = False)
-        if results:
-            print("******************************************************************************************************************")
-            print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
-            print("******************************************************************************************************************")
-            print("***                                                LIKE A BOSS!                                                ***")
-            print("******************************************************************************************************************")
-        else:
-            exit("GENTOOMUCH: Failed to containerize bootstrapped stage")
+    results = bootstrap_builder(arch, profile, tarball_path = path)
+    if results:
+        print("******************************************************************************************************************")
+        print("***        CONGRATULATIONS! YOU HAVE JUST BOOTSTRAPPED A PROPER, OPTIMIZED, DOCKERIZED GENTOO STAGE3!          ***")
+        print("******************************************************************************************************************")
+        print("***                                                LIKE A BOSS!                                                ***")
+        print("******************************************************************************************************************")
+    else:
+        exit("GENTOOMUCH: Failed to containerize bootstrapped stage")
     exit()
 ##################
 # Handle patching.

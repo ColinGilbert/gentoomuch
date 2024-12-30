@@ -18,7 +18,6 @@ from .package_from_patch import package_from_patch
 from .build_kernel import build_kernel
 from .sign_stage import sign_stage
 from .exec_user_hooks import exec_user_hooks
-from .are_patches_in_conflict import are_patches_in_conflict
 
 def save_tarball(arch: str, profile: str, stage_define: str, upstream: bool, patches: [str] = [], patches_have_been_compiled: bool = True, kconfig: str = '', friendly_name : str = '', custom_stage: str = '', scripts: [str] = [], removes: [str] = []):
     if friendly_name != '':

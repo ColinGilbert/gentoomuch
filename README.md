@@ -29,7 +29,7 @@ Nothing ever comes completely cost-free - If you are an existing (ie: skeptical)
 - The Gentoomuch pipeline takes more time than if you were to simply run emerge -q on your local system. In exchange, you get robustness, repeatability, and automation.
 - Portage hates not being in control of the kernel sources (especially when compiling/signing kernel modules), so we limit the user to a single version of gentoo-sources, which can be modified in gentoomuch-builder's local portage config files. 
 - Your workflow will change a bit. Mostly it'll mean defining your sets of packages/flags and then defining your machines from these sets, instead of directly within /etc/portage on each machine.
-- You have to add flags manually to your configs (ie: copy and paste from emerge -q output.) Using ``--autounmask-write`` and running ``dispatch-conf`` does't work in a pipeline that uses immutable containers.
+- You have to add flags manually to your configs (ie: copy and paste from emerge -q output.) Using ``--autounmask-write`` and running ``dispatch-conf`` doesn't work in a pipeline that uses immutable containers.
 - When making builder images, Gentoomuch keeps the tarball inside the image instead of deleting it as upstream does with their Docker images. This does entail an additional cost of space. However, you then benefit by completely avoiding the chicken-and-egg problem!
 - Bootstrapping dockerized images, epsecially for the first time, can take a while. This is because we do ``emerge -q --emptytree`` with ``ROOT=/mnt/gentoo`` (which points to a temporary environment.) This makes Portage re-emerge -q each package twice, once for ``/`` and once for ``/mnt/gentoo``. This is a possible bug in emerge -q and I'll be talking to upstream about that.
 - For some silly reason, ``gentoo-sources`` gets re-emerged on every pipeline invocation. I consider this a bug to be fixed and welcome any input from the community as to why this keeps happening.
@@ -39,7 +39,7 @@ Usage notes:
 ------------
 
 Your configuration lives in the ``~/gentoomuch-config`` directory.
-A configuration called "gentoomuch-builder" exists. Modify it when you need to; I made the decision to expose every possible configuration to the end-user. 
+A configuration called ``gentoomuch-builder`` exists. Modify it when you need to; I made the decision to expose every possible configuration to the end-user. 
 Further documentation is in the config directory. These aforementioned folders are intended to be both part of our pipeline and as living, implicitly-tested documentation for anyone looking to get started.
 
 CLI Reference:
@@ -52,6 +52,7 @@ CLI Reference:
 - ``gentoomuch bootstrap <profile.name> <tarball.filename>``: Bootstraps a builder from an upstream stage3 ands its corresponding .asc signature, for a profile you define.
 - ``gentoomuch profile ls``: Lists the profiles you've bootstrapped.
 - ``gentoomuch profile set <profile.name>``: Sets the profile that'll be used when calling ``freshroot``
+- ``gentoomuch profile update``: Updates the build environment for all profiles.
 - ``gentoomuch stage build <stage4.definition>``: Builds a stage4 that you've defined. This for you to test a build before running the whole pipeline.
 - ``gentoomuch kernel prep <kernel.config>``: Prepares a named kernel config and drops you into ``make nconfig``. If the configuration doesn't exist, Gentoomuch creates a new one. 
 - ``gentoomuch kernel update``: Deletes all downloaded kernel source files and re-download fresh ones.
@@ -81,11 +82,11 @@ Installation:
 - Download a stage3 of your architecture and its .asc signature from upstream and run ``gentoomuch bootstrap <profile-name> stage3-*.tar.xz`` and wait for the first emerge.
 - Once it's done, you should be good to go!
 
-I will be creating packages for Gentoo and possibly Ubuntu in the near future. Stay tuned for updates!
-
 Roadmap:
 --------
 
+- Ebuild of this project uploaded to Portage
+- Ubuntu package
 - Support for vanilla-sources and others
 - Cloud platform support (AWS first)
 - Package signing support
