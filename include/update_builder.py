@@ -13,11 +13,11 @@ def update_builder(arch: str, profile: str):
     if code:
       pass
     swap_stage(arch, profile, stage_define = 'gentoomuch-builder', upstream = False)
-    # scripts = []
-    # scripts_file = os.path.join(stage3_defines_path, 'gentoomuch-builder', 'scripts')
-    # if os.path.isfile(scripts_file):
-    #     scripts = read_file_lines(scripts_file)
-    valid, archive_name = save_tarball(arch, profile, stage_define = "gentoomuch-builder", upstream = False) #, scripts = scripts)
+    scripts = []
+    scripts_file = os.path.join(stage3_defines_path, 'gentoomuch-builder', 'scripts')
+    if os.path.isfile(scripts_file):
+        scripts = read_file_lines(scripts_file)
+    valid, archive_name = save_tarball(arch, profile, stage_define = "gentoomuch-builder", upstream = False, scripts = scripts)
     if valid:
         results = containerize(os.path.join(stages_path, archive_name), arch, profile, stage_define = 'gentoomuch-builder', upstream = False)
         return results
