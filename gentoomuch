@@ -17,7 +17,9 @@ from include.get_desired_profile import get_desired_profile
 from include.get_docker_tag import get_docker_tag
 from include.save_tarball import save_tarball
 from include.prep_patch import prep_patch
+from include.try_patch import try_patch
 from include.compile_patch import compile_patch
+from include.compile_patches import compile_patches
 from include.save_patch import save_patch
 from include.ui_patch_prep_handler import ui_patch_prep_handler, prep_str
 from include.get_profiles import get_profiles
@@ -28,7 +30,6 @@ from include.pipeline import pipeline
 from include.update_kernel import update_kernel
 from include.exec_in_chroot import exec_in_chroot
 from include.exec_user_hooks import exec_user_hooks
-from include.compile_patches import compile_patches
 from include.build_stage4 import build_stage4
 from include.are_patches_in_conflict import are_patches_in_conflict
 from include.read_file_lines import read_file_lines
@@ -204,10 +205,10 @@ elif prime_cmd == patch_str:
     elif len(sys.argv) > 2 and sys.argv[2] == try_str:
         if len(sys.argv) > 3:
             patch_name = sys.argv[3]
-            #print(patch_name)
+            #print(patch_name)/
             if profile == '':
                 exit("You need to set a desired profile")
-            compile_patch(profile, patch_name, True)
+            try_patch(profile, patch_name)
         else:
             exit("You need to provide a patch name to try.")
     # We save a patch to our config/patches directory
@@ -228,7 +229,7 @@ elif prime_cmd == patch_str:
         profiles = get_profiles()
         for p in profiles:
             for patch in patches:
-                results = compile_patch(p, patch, False)
+                results = compile_patch(p, patch)
                 if not results:
                     exit()
     else:
