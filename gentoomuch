@@ -288,9 +288,9 @@ elif prime_cmd == test_str:
 ################################
 elif prime_cmd == clean_str:
     remove_old_docker_images()
-    code = os.system("rm -rf " + stages_path + "/*")
-    if code == 0:
-        pass
+    # code = os.system("rm -rf " + stages_path + "/*")
+    # if code == 0:
+    #     pass
     code = os.system("docker system prune -f")
     if code == 0:
         pass
